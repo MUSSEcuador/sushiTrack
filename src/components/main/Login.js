@@ -2,13 +2,24 @@ import React from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 
+import { gql } from "apollo-boost";
+import { useMutation } from "@apollo/react-hooks";
+
 import {
   Grid,
   Typography,
   TextField,
   Button,
-  Snackbar
+  Snackbar,
 } from "@material-ui/core";
+
+const DATA_LOGIN = gql`
+  mutation Login($username: String!, $password: String!) {
+    login(username: $username, password: $password) {
+      token
+    }
+  }
+`;
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -84,10 +95,10 @@ const useStyles = makeStyles((theme) => ({
       width: "25vw",
     },
   },
-  snack:{
-      backgroundColor: theme.palette.primary.light,
-      padding: "1vh 2vw"
-  }
+  snack: {
+    backgroundColor: theme.palette.primary.light,
+    padding: "1vh 2vw",
+  },
 }));
 
 function Login(props) {
@@ -96,21 +107,37 @@ function Login(props) {
   const [password, setPassword] = React.useState("");
   const [openSnack, setOpenSnack] = React.useState(false);
 
+  //const {loading, error, data} = useMutation(DATA_LOGIN);
+
+  const [login, { data }] = useMutation(DATA_LOGIN);
+
+
+
   const submit = (e) => {
     e.preventDefault();
-    if (userName === "Vale" && password === "123") {
-      console.log("puede ingresar");
-    } else {
-      setOpenSnack(true);
-      setUserName("");
-      setPassword("")
-
-    }
+    console.log(e);
+    login({ variables: { username: userName, password: password } })
+      .then(result => {
+        console.log(result);
+        if (result.data?.login?.token) {
+          console.log("puede ingresar");
+          sessionStorage.setItem('token',result.data.login.token);
+          props.history.push("/track");
+        } else {
+          setOpenSnack(true);
+          setUserName("");
+          setPassword("");
+        }
+      })
+      .catch(err=>console.log(err));
+    
+    // props.history.push("/track");
+    // sessionStorage.setItem('token','123-123-123');
   };
 
-  const handleClose = () =>{
-      setOpenSnack(false)
-  }
+  const handleClose = () => {
+    setOpenSnack(false);
+  };
 
   return (
     <div className={classes.root}>
@@ -175,10 +202,13 @@ function Login(props) {
           </form>
         </Grid>
       </Grid>
-      <Snackbar open={openSnack} className={classes.snack} autoHideDuration={6000} onClose={handleClose}>
-        <Typography>
-          Su usuario y/o contraseña son incorrectos
-        </Typography>
+      <Snackbar
+        open={openSnack}
+        className={classes.snack}
+        autoHideDuration={6000}
+        onClose={handleClose}
+      >
+        <Typography>Su usuario y/o contraseña son incorrectos</Typography>
       </Snackbar>
     </div>
   );

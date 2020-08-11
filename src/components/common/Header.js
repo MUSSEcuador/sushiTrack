@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
     color: "rgb(255,255,255)",
   },
   button: {
-    color: theme.palette.primary.contrastText
+    color: theme.palette.primary.contrastText,
   },
   logoContainer: {
     textAlign: "left",
@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
 function Header(props) {
   const classes = useStyles();
 
-  const {openCallModal} = props;
+  const { openCallModal, history } = props;
   return (
     <div className={classes.root}>
       <Grid container>
@@ -41,8 +41,18 @@ function Header(props) {
             aria-label="text primary button group"
             className={classes.buttonGroup}
           >
-            <Button className={classes.button} onClick={openCallModal}>Llamar a Motorizado</Button>
-            <Button className={classes.button} >Cerrar Sesión</Button>
+            <Button className={classes.button} onClick={openCallModal}>
+              Llamar a Motorizado
+            </Button>
+            <Button
+              className={classes.button}
+              onClick={() => {
+                sessionStorage.removeItem("token");
+                history.push("/login");
+              }}
+            >
+              Cerrar Sesión
+            </Button>
           </ButtonGroup>
         </Grid>
       </Grid>

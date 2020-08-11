@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -14,46 +14,57 @@ import Error from "../common/Error";
 import Header from "../common/Header";
 import MotorizadoInfo from "./MotorizadoInfo";
 import CallMotorizado from "./CallMotorizado";
-//import { useStoreActions, useStoreState } from "easy-peasy";
 
 const DATOS = gql`
-  {
-    orders {
-      id
-      latitude
-      longitude
-      cellphone
-      name
-      lastName
-      principalStreet
-      secondaryStreet
-      number
-      sector
-      city
-      areaCode
-      countryCode
-      motorizado {
-        id
+  query GetSystemStats($token: String!) {
+    getSystemStats(token: $token) {
+      deliveries {
+        hasActiveDeliveries
         name
-        placa
-        cedula
-        phone
-        latitude
-        longitude
+        firstName
+        lastName
+        cellphone
+        currentRoute {
+          tripId
+          name
+          lastName
+          sector
+          principalStreet
+          secondaryStreet
+          number
+          city
+          cellphone
+          timeIn
+          timeOut
+          openDate
+        }
+        ordersAssigned {
+          tripId
+        deliveryStatus
+         name
+        lastName
+        sector
+        principalStreet
+        secondaryStreet
+        number
+        city
+        cellphone
+        }
       }
-    }
-    motorizados {
-      id
-      name
-      placa
-      cedula
-      phone
-      latitude
-      longitude
+      deliveriesWithActiveRoutes {
+        remainOrdersAssigned
+        delivery
+        lastUpdate
+        lastLatitude
+        lastLongitude
+        destinationLatitude
+        destinationLongitude
+        receipment
+        tripId
+      }
     }
   }
 `;
-
 const useStyles = makeStyles((theme) => ({
   root: {
     paddingTop: "2vh",
@@ -97,6 +108,11 @@ const useStyles = makeStyles((theme) => ({
   infoWindowText: {
     color: "black",
   },
+  modal:{
+    marginLeft: "30vw",
+    marginTop:"20vh",
+    marginRight: "30vw"
+  }
 }));
 
 function Track(props) {
@@ -111,11 +127,16 @@ function Track(props) {
   const [mapZoom, setMapZoom] = React.useState(13);
   const [showingInfoWindow, setshowingInfoWindow] = React.useState(false);
   const [activeMarker, setactiveMarker] = React.useState({});
-  const { loading, error, data } = useQuery(DATOS);
+  const [token] = React.useState(sessionStorage.token);
+  const { loading, error, data } = useQuery(DATOS, {
+    variables: { token },
+    pollInterval: 3000
+  });
 
   const [openCall, setOpenCall] = React.useState(false);
 
   //FUNCTIONS
+
   const onMarkerClick = (props, marker, e) => {
     console.log(marker);
     setactiveMarker(marker);
@@ -135,109 +156,115 @@ function Track(props) {
   const closeCallModal = () => {
     setOpenCall(false);
   };
-  const recenter = (veh) => {
+  const recenter = (order) => {
+    console.log(order);
     setMapZoom(16);
-    setLatitud(veh.motorizado.latitude);
-    setLongitud(veh.motorizado.longitude);
+    setLatitud(order.lastLatitude);
+    setLongitud(order.lastLongitude);
   };
 
-  if (loading) return (<Loading/>);
-  if (error) return (<Error error={error}/>);
-  return (
-    <div className={classes.root}>
-      <Header openCallModal={openCallModal} />
-      <Grid container>
-        <Grid item xs={12} md={3} className={classes.controlPanel}>
-          <div className={classes.vehMap}>
-            {data.orders
-              ? data.orders.map((veh) => {
-                  return (
-                    <MotorizadoInfo
-                      veh={veh}
-                      key={veh.id}
-                      recenter={recenter}
-                    />
-                  );
-                })
-              : null}
-          </div>
-        </Grid>
-        <Grid item sm={12} md={9}>
-          <div className={classes.divMapContainer}>
-            <Map
-              item
-              xs={6}
-              google={props.google}
-              zoom={mapZoom}
-              mapTypeControl={true}
-              initialCenter={{ lat: latitudInicial, lng: longitudInicial }}
-              center={{ lat: latitud, lng: longitud }}
-              onClick={(props, marker, event) => {
-                onMapClick();
-              }}
-            >
-              {data.orders
-                ? data.orders.map((elTrack) => {
+  if (loading) return <Loading />;
+  if (error) return <Error error={error} />;
+  if (data) {
+    let transformed = data.getSystemStats.deliveriesWithActiveRoutes;
+    const deliveriesData = data.getSystemStats.deliveries;
+    transformed = transformed.map((summary) => {
+      const found = deliveriesData.find((d) => d.name === summary.delivery);
+      if (found) {
+        summary.receipment = found.currentRoute;
+        summary.ordersAssigned = found.ordersAssigned;
+      }
+
+      return summary;
+    });
+
+    return (
+      <div className={classes.root}>
+        <Header openCallModal={openCallModal} history={props.history} />
+        <Grid container>
+          <Grid item xs={12} md={3} className={classes.controlPanel}>
+            <div className={classes.vehMap}>
+              {transformed
+                ? transformed.map((order) => {
                     return (
-                      <Marker
-                        key={elTrack.id}
-                        onClick={onMarkerClick}
-                        title={elTrack.motorizado.name}
-                        placa={elTrack.placa}
-                        location={
-                          "Lat: " +
-                          elTrack.motorizado.latitude +
-                          " Long: " +
-                          elTrack.motorizado.longitude
-                        }
-                        //   icon={
-                        //       {
-                        //           url: "/img/truckIcon.png",
-                        //         }
-                        //   }
-                        position={{
-                          lat: elTrack.motorizado.latitude,
-                          lng: elTrack.motorizado.longitude,
-                        }}
+                      <MotorizadoInfo
+                        order={order}
+                        key={order.tripId}
+                        recenter={recenter}
                       />
                     );
                   })
                 : null}
-              <InfoWindow marker={activeMarker} visible={showingInfoWindow}>
-                <div>
-                  <p align="center" className={classes.infoWindowTitle}>
-                    {" "}
-                    {"Nombre: " + activeMarker.title}
-                  </p>
-                  {activeMarker.position ? (
+            </div>
+          </Grid>
+          <Grid item sm={12} md={9}>
+            <div className={classes.divMapContainer}>
+              <Map
+                item
+                xs={6}
+                google={props.google}
+                zoom={mapZoom}
+                mapTypeControl={true}
+                initialCenter={{ lat: latitudInicial, lng: longitudInicial }}
+                center={{ lat: latitud, lng: longitud }}
+                onClick={(props, marker, event) => {
+                  onMapClick();
+                }}
+              >
+                {transformed
+                  ? transformed.map((elTrack) => {
+                      return (
+                        <Marker
+                          key={elTrack.tripId}
+                          onClick={onMarkerClick}
+                          title={elTrack.delivery}
+                          tripId={elTrack.tripId}
+                          location={
+                            "Lat: " +
+                            elTrack.destinationLatitude +
+                            " Long: " +
+                            elTrack.destinationLongitude
+                          }
+                          //   icon={
+                          //       {
+                          //           url: "/img/truckIcon.png",
+                          //         }
+                          //   }
+                          position={{
+                            lat: elTrack.destinationLatitude,
+                            lng: elTrack.destinationLongitude,
+                          }}
+                        />
+                      );
+                    })
+                  : null}
+                <InfoWindow marker={activeMarker} visible={showingInfoWindow}>
+                  <div>
+                    <p align="center" className={classes.infoWindowTitle}>
+                      {" "}
+                      {"Delivery: " + activeMarker.title}
+                    </p>
                     <p
                       align="justify"
                       variant="caption"
                       className={classes.infoWindowText}
                     >
-                      {activeMarker.location}
+                      {"Id Entrega Actual: " + activeMarker.tripId}
                     </p>
-                  ) : null}
-                  <p
-                    align="justify"
-                    variant="caption"
-                    className={classes.infoWindowText}
-                  >
-                    {"Fecha: " + activeMarker.placa}
-                  </p>
-                </div>
-              </InfoWindow>
-            </Map>
-          </div>
+                  </div>
+                </InfoWindow>
+              </Map>
+            </div>
+          </Grid>
         </Grid>
-      </Grid>
-      <Modal open={openCall} onClose={closeCallModal}>
-        <div>
-          <CallMotorizado motorizados={data.motorizados} />
-        </div>
-      </Modal>
-    </div>
-  );
+        <Modal open={openCall} onClose={closeCallModal} className={classes.modal}>
+          <div>
+            <CallMotorizado motorizados={data.getSystemStats.deliveries} />
+          </div>
+        </Modal>
+      </div>
+    );
+  }
 }
 
 export default GoogleApiWrapper({
