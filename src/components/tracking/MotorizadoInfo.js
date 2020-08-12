@@ -8,6 +8,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import AirportShuttleIcon from "@material-ui/icons/AirportShuttle";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
+import DeviceHubIcon from '@material-ui/icons/DeviceHub';
 
 import OrderInfo from "./OrderInfo";
 
@@ -50,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
 function MotorizadoInfo(props) {
   const classes = useStyles();
 
-  const { order, recenter } = props;
+  const { order, recenter, destinoCenter ,showOrderRoute } = props;
 
   const [openInfo, setOpenInfo] = React.useState(false);
   let lastUpdateSplitted = order.lastUpdate.split("T");
@@ -95,12 +96,28 @@ function MotorizadoInfo(props) {
             </Tooltip>
           </Grid>
           <Grid item xs={1}>
-            <Tooltip title="Ir a" enterDelay={600} leaveDelay={150}>
+            <Tooltip title="Ruta" enterDelay={600} leaveDelay={150}>
               <InputAdornment position="start">
                 <IconButton
                   className={classes.activo}
                   onClick={(e) => {
-                    console.log(order);
+                    e.preventDefault();
+                    showOrderRoute(order);
+                  }}
+                >
+                  <DeviceHubIcon />
+                </IconButton>
+              </InputAdornment>
+            </Tooltip>
+          </Grid>
+          <Grid item xs={1}>
+            <Tooltip title="Ub. Actual" enterDelay={600} leaveDelay={150}>
+              <InputAdornment position="start">
+                <IconButton
+                  className={classes.activo}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    recenter(order);
                   }}
                 >
                   <LocationOnIcon />
@@ -108,15 +125,14 @@ function MotorizadoInfo(props) {
               </InputAdornment>
             </Tooltip>
           </Grid>
-
           <Grid item xs={1}>
-            <Tooltip title="Ver en pantalla" enterDelay={400} leaveDelay={200}>
+            <Tooltip title="Destino" enterDelay={400} leaveDelay={200}>
               <InputAdornment position="start">
                 <IconButton
                   className={classes.activo}
                   onClick={(e) => {
                     e.preventDefault();
-                    recenter(order);
+                    destinoCenter(order);
                   }}
                 >
                   {<VisibilityIcon />}

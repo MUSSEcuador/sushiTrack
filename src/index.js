@@ -14,9 +14,9 @@ const client = new ApolloClient({
 });
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App client={client}/>
-  </React.StrictMode>,
+  // <React.StrictMode>
+    <App client={client}/>,
+  // </React.StrictMode>,
   document.getElementById('root')
 );
 

@@ -7,8 +7,14 @@ import { useQuery } from "@apollo/react-hooks";
 
 import { Grid, Modal } from "@material-ui/core";
 
-import { GoogleApiWrapper, InfoWindow, Map, Marker } from "google-maps-react";
+import {
+  GoogleApiWrapper,
+  InfoWindow,
+  Marker,
+  DirectionsRenderer,
+} from "google-maps-react";
 
+import MapContainerF from "./MapContainerF";
 import Loading from "../common/Loading";
 import Error from "../common/Error";
 import Header from "../common/Header";
@@ -40,15 +46,15 @@ const DATOS = gql`
         }
         ordersAssigned {
           tripId
-        deliveryStatus
-         name
-        lastName
-        sector
-        principalStreet
-        secondaryStreet
-        number
-        city
-        cellphone
+          deliveryStatus
+          name
+          lastName
+          sector
+          principalStreet
+          secondaryStreet
+          number
+          city
+          cellphone
         }
       }
       deliveriesWithActiveRoutes {
@@ -108,11 +114,11 @@ const useStyles = makeStyles((theme) => ({
   infoWindowText: {
     color: "black",
   },
-  modal:{
+  modal: {
     marginLeft: "30vw",
-    marginTop:"20vh",
-    marginRight: "30vw"
-  }
+    marginTop: "20vh",
+    marginRight: "30vw",
+  },
 }));
 
 function Track(props) {
@@ -120,17 +126,19 @@ function Track(props) {
   const classes = useStyles();
 
   //local variables
-  const [latitudInicial] = React.useState(-0.21000068);
+  const [latitudInicial] = React.useState(-0.41000068);
   const [longitudInicial] = React.useState(-78.493335);
   const [latitud, setLatitud] = React.useState(latitudInicial);
   const [longitud, setLongitud] = React.useState(longitudInicial);
   const [mapZoom, setMapZoom] = React.useState(13);
   const [showingInfoWindow, setshowingInfoWindow] = React.useState(false);
   const [activeMarker, setactiveMarker] = React.useState({});
+  const [showRoute, setShowRoute] = React.useState(false);
+  const [dataToShowRoute, setDataToShowRoute] = React.useState([]);
   const [token] = React.useState(sessionStorage.token);
   const { loading, error, data } = useQuery(DATOS, {
     variables: { token },
-    pollInterval: 3000
+    pollInterval: 3000,
   });
 
   const [openCall, setOpenCall] = React.useState(false);
@@ -150,6 +158,10 @@ function Track(props) {
     }
   };
 
+  const callSetActiveMarker = (marker) =>{
+    setactiveMarker(marker)
+  }
+
   const openCallModal = () => {
     setOpenCall(true);
   };
@@ -162,6 +174,31 @@ function Track(props) {
     setLatitud(order.lastLatitude);
     setLongitud(order.lastLongitude);
   };
+
+  const destinoCenter = (order) => {
+    console.log(order);
+    setMapZoom(16);
+    setLatitud(order.destinationLatitude);
+    setLongitud(order.destinationLongitude);
+  };
+
+  const showOrderRoute = (order) =>{
+    console.log(order)
+    setShowRoute(true);
+    const data = [
+      {
+        // lat: order.lastLatitude,
+        // lng: order.lastLongitude,
+        lat: -0.0413335,
+        lng: -78.493335
+      },
+      { 
+        lat: order.destinationLatitude,
+        lng: order.destinationLongitude,
+      }
+    ];
+    setDataToShowRoute(data)
+  }
 
   if (loading) return <Loading />;
   if (error) return <Error error={error} />;
@@ -191,6 +228,8 @@ function Track(props) {
                         order={order}
                         key={order.tripId}
                         recenter={recenter}
+                        destinoCenter={destinoCenter}
+                        showOrderRoute = {showOrderRoute}
                       />
                     );
                   })
@@ -198,66 +237,25 @@ function Track(props) {
             </div>
           </Grid>
           <Grid item sm={12} md={9}>
-            <div className={classes.divMapContainer}>
-              <Map
-                item
-                xs={6}
-                google={props.google}
-                zoom={mapZoom}
-                mapTypeControl={true}
-                initialCenter={{ lat: latitudInicial, lng: longitudInicial }}
-                center={{ lat: latitud, lng: longitud }}
-                onClick={(props, marker, event) => {
-                  onMapClick();
-                }}
-              >
-                {transformed
-                  ? transformed.map((elTrack) => {
-                      return (
-                        <Marker
-                          key={elTrack.tripId}
-                          onClick={onMarkerClick}
-                          title={elTrack.delivery}
-                          tripId={elTrack.tripId}
-                          location={
-                            "Lat: " +
-                            elTrack.destinationLatitude +
-                            " Long: " +
-                            elTrack.destinationLongitude
-                          }
-                          //   icon={
-                          //       {
-                          //           url: "/img/truckIcon.png",
-                          //         }
-                          //   }
-                          position={{
-                            lat: elTrack.destinationLatitude,
-                            lng: elTrack.destinationLongitude,
-                          }}
-                        />
-                      );
-                    })
-                  : null}
-                <InfoWindow marker={activeMarker} visible={showingInfoWindow}>
-                  <div>
-                    <p align="center" className={classes.infoWindowTitle}>
-                      {" "}
-                      {"Delivery: " + activeMarker.title}
-                    </p>
-                    <p
-                      align="justify"
-                      variant="caption"
-                      className={classes.infoWindowText}
-                    >
-                      {"Id Entrega Actual: " + activeMarker.tripId}
-                    </p>
-                  </div>
-                </InfoWindow>
-              </Map>
-            </div>
+            <MapContainerF
+              latitud={latitud}
+              longitud={longitud}
+              mapZoom={mapZoom}
+              transformed={transformed}
+              showRoute={showRoute}
+              dataToShowRoute={dataToShowRoute}
+              activeMarker={activeMarker}
+              callSetActiveMarker={callSetActiveMarker}
+              setshowingInfoWindow={setshowingInfoWindow}
+              showingInfoWindow={showingInfoWindow}
+            />
           </Grid>
         </Grid>
-        <Modal open={openCall} onClose={closeCallModal} className={classes.modal}>
+        <Modal
+          open={openCall}
+          onClose={closeCallModal}
+          className={classes.modal}
+        >
           <div>
             <CallMotorizado motorizados={data.getSystemStats.deliveries} />
           </div>
