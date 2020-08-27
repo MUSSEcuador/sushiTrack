@@ -40,7 +40,7 @@ export default {
     contrastText: white,
     dark: colors.orange[900],
     main: colors.orange[600],
-    light: colors.orange[400]
+    light: colors.orange[50]
 
   },
   error: {
@@ -48,7 +48,7 @@ export default {
     contrastText: white,
     dark: colors.red[900],
     main: colors.red[600],
-    light: colors.red[400]
+    light: colors.red[50]
    
   },
   text: {

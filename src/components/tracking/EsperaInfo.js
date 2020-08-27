@@ -6,18 +6,18 @@ import { Typography } from "@material-ui/core";
 const useStyles = makeStyles((theme) => ({
   root: {
     boxShadow: "3px 3px 25px rgb(0,0,0)",
-    height: "35vh",
-    width: "30vw",
+    height: "56vh",
+    width: "56vw",
     color: theme.palette.secondary.main,
     backgroundColor: theme.palette.primary.light,
     textAlign: "center",
   },
-  titleContainer:{
+  titleContainer: {
     backgroundColor: theme.palette.primary.main,
     height: "20%",
-    paddingTop: "1vh"
+    paddingTop: "1vh",
   },
-  contentContainer:{
+  contentContainer: {
     padding: "1vh 2vw",
   },
   title: {
@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.secondary.contrastText,
     textDecoration: "underline",
     fontSize: "1.3em",
-    fontWeight: 700
+    fontWeight: 700,
   },
   subtitle: {
     padding: "1vh",
@@ -42,24 +42,41 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 100,
     fontSize: "1.2em",
   },
+  items: {
+    maxHeight: "45%",
+    margin: "0vh 1vw 2vh",
+    display: "flex",
+    flexDirection: "column",
+    overflow: "scroll",
+    borderStyle: "solid",
+    borderWidth: "1px",
+    borderColor: "lightgrey"
+  },
+  itemsText: {
+    padding: "0.5vh",
+    color: theme.palette.secondary.contrastText,
+    fontWeight: 100,
+    fontSize: "1.1em",
+  },
 }));
 
 function EsperaInfo(props) {
-  const {ordersAssigned } = props;
+  const { ordersAssigned } = props;
   const classes = useStyles();
 
   const getDireccion = () => {
     let dir = "";
-    if (ordersAssigned.principalStreet) {
-      dir = dir + ordersAssigned.principalStreet + " ";
+    if (ordersAssigned.order.clientAddress.principalStreet) {
+      dir = dir + ordersAssigned.order.clientAddress.principalStreet + " ";
     }
-    if (ordersAssigned.number) {
-      dir = dir + ordersAssigned.number + " ";
+    if (ordersAssigned.order.clientAddress.number) {
+      dir = dir + ordersAssigned.order.clientAddress.number + " ";
     }
-    if (ordersAssigned.secondaryStreet) {
-      if (ordersAssigned.number) {
-        dir = dir + ordersAssigned.secondaryStreet;
-      } else dir = dir + " y " + ordersAssigned.secondaryStreet;
+    if (ordersAssigned.order.clientAddress.secondaryStreet) {
+      if (ordersAssigned.order.clientAddress.number) {
+        dir = dir + ordersAssigned.order.clientAddress.secondaryStreet;
+      } else
+        dir = dir + " y " + ordersAssigned.order.clientAddress.secondaryStreet;
     }
     return dir;
   };
@@ -67,30 +84,49 @@ function EsperaInfo(props) {
   return (
     <div className={classes.root}>
       <div className={classes.titleContainer}>
-      <Typography className={classes.title} align="center">
-      {"Orden #: "+ordersAssigned.tripId}
-      </Typography>
+        <Typography className={classes.title} align="center">
+          {"Orden #: " + ordersAssigned.order.tripId}
+        </Typography>
       </div>
       <div className={classes.contentContainer}>
-      
-      <Typography align="justify" className={classes.subtitle}>
-        <b>Cliente:</b> {" " + ordersAssigned.name + " " + ordersAssigned.lastName}
-      </Typography>
-      {ordersAssigned.sector ? (
         <Typography align="justify" className={classes.subtitle}>
-          <b>Sector:</b> {" " + ordersAssigned.sector}
+          <b>Cliente:</b>{" "}
+          {" " +
+            ordersAssigned.order.client.name +
+            " " +
+            ordersAssigned.order.client.lastname}
         </Typography>
-      ) : null}
-      {ordersAssigned.principalStreet ? (
-        <Typography align="justify" className={classes.subtitle}>
-          <b>Dirección:</b> {getDireccion()}
+        {ordersAssigned.order.clientAddress.sector ? (
+          <Typography align="justify" className={classes.subtitle}>
+            <b>Sector:</b> {" " + ordersAssigned.order.clientAddress.sector}
+          </Typography>
+        ) : null}
+        {ordersAssigned.order.clientAddress.principalStreet ? (
+          <Typography align="justify" className={classes.subtitle}>
+            <b>Dirección:</b> {getDireccion()}
+          </Typography>
+        ) : null}
+        {ordersAssigned.order.clientAddress.cellphone ? (
+          <Typography align="justify" className={classes.subtitle}>
+            <b>Teléfono:</b>{" "}
+            {" " + ordersAssigned.order.clientAddress.cellphone}
+          </Typography>
+        ) : null}
+        <Typography >
+          <b>Orden</b>
         </Typography>
-      ) : null}
-      {ordersAssigned.cellphone ? (
-        <Typography align="justify" className={classes.subtitle}>
-          <b>Teléfono:</b> {" " + ordersAssigned.cellphone}
-        </Typography>
-      ) : null}
+      </div>
+      <div className={classes.items}>
+        {ordersAssigned.order.items
+          ? ordersAssigned.order.items.map((item, index) => {
+              return (
+                <Typography key={index} className={classes.itemsText}>
+                  {" "}
+                  {item.quantity + " " + item.description}
+                </Typography>
+              );
+            })
+          : null}
       </div>
     </div>
   );

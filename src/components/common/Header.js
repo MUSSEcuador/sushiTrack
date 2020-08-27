@@ -12,9 +12,17 @@ const useStyles = makeStyles((theme) => ({
   },
   buttonGroup: {
     color: "rgb(255,255,255)",
+    marginRight: "10vw",
   },
   button: {
     color: theme.palette.primary.contrastText,
+    marginLeft: "0.2vw",
+  },
+  buttonSelect: {
+    color: theme.palette.secondary.light,
+    backgroundColor: theme.palette.primary.contrastText,
+    fontSize: "1.1em",
+    marginLeft: "0.2vw",
   },
   logoContainer: {
     textAlign: "left",
@@ -27,7 +35,8 @@ const useStyles = makeStyles((theme) => ({
 function Header(props) {
   const classes = useStyles();
 
-  const { openCallModal, history } = props;
+  const { cityFilter, history, cities, setCityFilter } = props;
+
   return (
     <div className={classes.root}>
       <Grid container>
@@ -36,14 +45,37 @@ function Header(props) {
         </Grid>
         <Grid item xs={6} className={classes.buttonsContainer}>
           <ButtonGroup
-            variant="text"
+            variant="contained"
             color="secondary"
             aria-label="text primary button group"
             className={classes.buttonGroup}
           >
-            <Button className={classes.button} onClick={openCallModal}>
-              Llamar a Motorizado
+            <Button className={cityFilter==="TODAS"?classes.buttonSelect:classes.button} onClick={() => {
+                    localStorage.setItem('citySelected',"TODAS");
+                    setCityFilter("TODAS");
+                  }}>
+              TODAS
             </Button>
+            {cities.map((el, index) => {
+              return (
+                <Button
+                  className={cityFilter===el?classes.buttonSelect:classes.button}
+                  key={index}
+                  onClick={() => {
+                    localStorage.setItem('citySelected',el);
+                    setCityFilter(el);
+                  }}
+                >
+                  {el}
+                </Button>
+              );
+            })}
+          </ButtonGroup>
+          <ButtonGroup
+            variant="text"
+            color="secondary"
+            aria-label="text primary button group"
+          >
             <Button
               className={classes.button}
               onClick={() => {

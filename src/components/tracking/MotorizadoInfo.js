@@ -1,32 +1,69 @@
 import React from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
-
-import { Grid, IconButton, Box, Typography, Tooltip, Modal} from "@material-ui/core";
+import moment from "moment";
+import {
+  Grid,
+  IconButton,
+  Box,
+  Typography,
+  Tooltip,
+  Modal,
+} from "@material-ui/core";
 
 import InputAdornment from "@material-ui/core/InputAdornment";
 import AirportShuttleIcon from "@material-ui/icons/AirportShuttle";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
-import DeviceHubIcon from '@material-ui/icons/DeviceHub';
+import DeviceHubIcon from "@material-ui/icons/DeviceHub";
+import EmojiTransportationIcon from '@material-ui/icons/EmojiTransportation';
 
 import OrderInfo from "./OrderInfo";
 
 const useStyles = makeStyles((theme) => ({
-  box: {
-    margin: "0.5vh 0vw 0.5vh 2vw",
-    width: "90%",
+  withRoute: {
+    margin: "0.5vh 0vw ",
+    width: "100%",
     boxShadow: "2px 2px 5px rgb(100,100,100)",
     backgroundColor: theme.palette.primary.light,
     [theme.breakpoints.down("sm")]: {
-      width: "80%",
+      width: "95%",
     },
+    position: "relative",
+  },
+  withoutRoute: {
+    margin: "0.5vh 0vw",
+    width: "100%",
+    boxShadow: "2px 2px 5px rgb(100,100,100)",
+    backgroundColor: theme.palette.error.light,
+    [theme.breakpoints.down("sm")]: {
+      width: "95%",
+    },
+    position: "relative",
+  },
+  alerta: {
+    position: "absolute",
+    right: "4px",
+    top: "4px",
+    width: "35%",
+    fontWeight: 500,
+    fontSize: 11,
+    color: theme.palette.secondary.dark,
+    padding: "0.5vh 0 0 0",
+    boxShadow: "2px 2px 5px rgb(100,100,100)",
+  },
+  called: {
+    position: "absolute",
+    left: "4px",
+    top: "2px",
+    color: theme.palette.primary.main,
   },
   vehTitle: {
     fontSize: 16,
     fontWeight: 800,
     paddingTop: "1vh",
     color: theme.palette.secondary.contrastText,
+    marginBottom: "2vh",
   },
   vehData: {
     fontSize: 13,
@@ -41,43 +78,97 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: "2px",
     paddingLeft: "1vw",
   },
-  modal:{
-    marginLeft: "30vw",
-    marginTop:"20vh",
-    marginRight: "30vw"
-  }
+  modal: {
+    marginLeft: "15vw",
+    marginTop: "15vh",
+    marginRight: "15vw",
+  },
 }));
 
 function MotorizadoInfo(props) {
   const classes = useStyles();
 
-  const { order, recenter, destinoCenter ,showOrderRoute } = props;
+  const { order, recenter, destinoCenter, showOrderRoute, showOffice } = props;
 
   const [openInfo, setOpenInfo] = React.useState(false);
-  let lastUpdateSplitted = order.lastUpdate.split("T");
-  const fecha = lastUpdateSplitted[0];
-  lastUpdateSplitted = lastUpdateSplitted[1].split(".");
-  const hora =lastUpdateSplitted[0]; 
+
+  const getLastUpdate = () => {
+    if (order.lastUpdate) {
+      let toTime = moment(order.lastUpdate).toLocaleString();
+      toTime = toTime.split("G");
+      toTime = toTime[0];
+      return toTime;
+    }
+  };
+
+  const calculateDelay = () => {
+    let calc = moment.now() - moment(order.lastUpdate);
+    let duration = moment.duration(calc).asMinutes();
+    return duration;
+  };
 
   const closeModal = () => {
     setOpenInfo(false);
   };
-  console.log(order, fecha, hora);
+
   return (
     <div>
-      <Box className={classes.box}>
-        <Typography className={classes.vehTitle}>
-          {" "}
-          {order.delivery}
+      <Box
+        className={
+          order.hasActiveDeliveries ? classes.withRoute : classes.withoutRoute
+        }
+      >
+        {calculateDelay() > 5 ? (
+          <p className={classes.alerta}>
+            <span>No se ha actualizado en:</span>
+            <br />
+            <b>{+calculateDelay().toFixed(0)}</b>
+            <span> minutos</span>
+          </p>
+        ) : null}
+        {order.returningToOffice ? (
+          <Tooltip title="Regresando a local" enterDelay={400} leaveDelay={200}>
+            <InputAdornment position="start">
+              <IconButton
+                className={classes.called}
+                onClick={(e) => {
+                  showOffice(order.returningToOffice.officePosition);
+                }}
+              >
+                <EmojiTransportationIcon />
+              </IconButton>
+            </InputAdornment>
+          </Tooltip>
+        ) : null}
+
+        <Typography className={classes.vehTitle}> {order.name}</Typography>
+        <Typography align="left" className={classes.vehData}>
+          <b>Delivery: </b>
+          {" " + order.firstName + " " + order.lastName}
         </Typography>
         <Typography align="left" className={classes.vehData}>
-          <b>Identificador: </b>{" " + order.receipment.tripId}
+          <b>Ultima actualización: </b>
+          {getLastUpdate()}
         </Typography>
-        <Typography align="left" className={classes.vehData}>
-          <b>Ultima actualización: </b>{" " + fecha + " " + hora}
-        </Typography>
+        {order.currentRoute ? (
+          <div>
+            <Typography align="justify" className={classes.vehData}>
+              <b>Orden actual Id: </b>
+              {" " + order.currentRoute.order.transact}
+            </Typography>
+            <Typography align="justify" className={classes.vehData}>
+              <b>Orden actual Cliente: </b>
+              {" " +
+                order.currentRoute.order.client.name +
+                " " +
+                order.currentRoute.order.client.lastname}
+            </Typography>
+          </div>
+        ) : null}
+
         <Typography align="justify" className={classes.vehData}>
-          <b>Ordenes en espera: </b>{" " + order.remainOrdersAssigned}
+          <b>Ordenes en espera: </b>
+          {" " + order.ordersAssigned.length}
         </Typography>
         <Grid container spacing={4} className={classes.iconsList}>
           <Grid item xs={1}>
@@ -86,7 +177,6 @@ function MotorizadoInfo(props) {
                 <IconButton
                   className={classes.activo}
                   onClick={(e) => {
-                    console.log(e.target.value);
                     setOpenInfo(true);
                   }}
                 >
@@ -104,6 +194,7 @@ function MotorizadoInfo(props) {
                     e.preventDefault();
                     showOrderRoute(order);
                   }}
+                  disabled={!order.currentRoute?.order?.destination}
                 >
                   <DeviceHubIcon />
                 </IconButton>
@@ -134,6 +225,7 @@ function MotorizadoInfo(props) {
                     e.preventDefault();
                     destinoCenter(order);
                   }}
+                  disabled={!order.currentRoute?.order?.destination}
                 >
                   {<VisibilityIcon />}
                 </IconButton>
@@ -144,7 +236,7 @@ function MotorizadoInfo(props) {
       </Box>
       <Modal open={openInfo} onClose={closeModal} className={classes.modal}>
         <div>
-          <OrderInfo name={order.delivery} order={order.receipment} ordersAssigned={order.ordersAssigned} />
+          <OrderInfo order={order} />
         </div>
       </Modal>
     </div>

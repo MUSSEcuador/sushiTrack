@@ -42,7 +42,6 @@ const useStyles = makeStyles((theme) => ({
 function Loading(props) {
     const classes = useStyles()
 
-    const {number} = props
     return (
         <div className={classes.root}>
              <img alt="logo" src="/img/logo.png" className={classes.logo}></img>

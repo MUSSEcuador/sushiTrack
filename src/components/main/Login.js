@@ -109,18 +109,15 @@ function Login(props) {
 
   //const {loading, error, data} = useMutation(DATA_LOGIN);
 
-  const [login, { data }] = useMutation(DATA_LOGIN);
+  const [login] = useMutation(DATA_LOGIN);
 
 
 
   const submit = (e) => {
     e.preventDefault();
-    console.log(e);
     login({ variables: { username: userName, password: password } })
       .then(result => {
-        console.log(result);
         if (result.data?.login?.token) {
-          console.log("puede ingresar");
           sessionStorage.setItem('token',result.data.login.token);
           props.history.push("/track");
         } else {
@@ -156,7 +153,6 @@ function Login(props) {
             className={classes.form}
             onSubmit={(e) => {
               submit(e);
-              console.log(userName, password);
             }}
           >
             <Grid container>

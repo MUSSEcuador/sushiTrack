@@ -5,14 +5,12 @@ import { makeStyles } from "@material-ui/core/styles";
 import { gql } from "apollo-boost";
 import { useQuery } from "@apollo/react-hooks";
 
-import { Grid, Modal } from "@material-ui/core";
+import { Grid, Modal, TextField, IconButton, Button } from "@material-ui/core";
 
-import {
-  GoogleApiWrapper,
-  InfoWindow,
-  Marker,
-  DirectionsRenderer,
-} from "google-maps-react";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import SearchIcon from "@material-ui/icons/Search";
+
+import { GoogleApiWrapper } from "google-maps-react";
 
 import MapContainerF from "./MapContainerF";
 import Loading from "../common/Loading";
@@ -20,6 +18,7 @@ import Error from "../common/Error";
 import Header from "../common/Header";
 import MotorizadoInfo from "./MotorizadoInfo";
 import CallMotorizado from "./CallMotorizado";
+import LocalInfo from "./LocalInfo";
 
 const DATOS = gql`
   query GetSystemStats($token: String!) {
@@ -30,31 +29,125 @@ const DATOS = gql`
         firstName
         lastName
         cellphone
+        lastUpdate
+        lastPosition {
+          latitude
+          longitude
+        }
+        city
+        returningToOffice {
+          reason
+          officeLocation {
+            principalStreet
+            secondaryStreet
+          }
+          officePosition {
+            latitude
+            longitude
+          }
+        }
         currentRoute {
-          tripId
-          name
-          lastName
-          sector
-          principalStreet
-          secondaryStreet
-          number
-          city
-          cellphone
-          timeIn
-          timeOut
-          openDate
+          id
+          deliveryId
+          order {
+            origin {
+              latitude
+              longitude
+            }
+            destination {
+              latitude
+              longitude
+            }
+            client {
+              name
+              lastname
+              identificationNumber
+            }
+            clientAddress {
+              principalStreet
+              secondaryStreet
+              countryCode
+              city
+              phone
+              cellphone
+              sector
+              directions
+            }
+            officeAddress {
+              principalStreet
+              secondaryStreet
+              countryCode
+              city
+              phone
+              cellphone
+              sector
+              directions
+            }
+            shippedTo
+            transact
+            empNum
+            memCode
+            deliveryStatus
+            tripId
+            timeOut
+            timeIn
+            openDate
+          }
         }
         ordersAssigned {
-          tripId
-          deliveryStatus
-          name
-          lastName
-          sector
-          principalStreet
-          secondaryStreet
-          number
-          city
-          cellphone
+          id
+          deliveryId
+          order {
+            origin {
+              latitude
+              longitude
+            }
+            destination {
+              latitude
+              longitude
+            }
+            client {
+              name
+              lastname
+              identificationNumber
+            }
+            clientAddress {
+              principalStreet
+              secondaryStreet
+              countryCode
+              directions
+              city
+              number
+              phone
+              cellphone
+              sector
+              directions
+            }
+            officeAddress {
+              principalStreet
+              secondaryStreet
+              countryCode
+              directions
+              city
+              phone
+              cellphone
+              sector
+              directions
+            }
+            items {
+              quantity
+              description
+            }
+            shippedTo
+            transact
+            empNum
+            memCode
+            deliveryStatus
+            tripId
+            timeOut
+            timeIn
+            openDate
+          }
         }
       }
       deliveriesWithActiveRoutes {
@@ -71,6 +164,27 @@ const DATOS = gql`
     }
   }
 `;
+
+const STORES = gql`
+  query GetStores($token: String!) {
+    getStores(token: $token) {
+      id
+      name
+      code
+      lastUpdate
+      location {
+        latitude
+        longitude
+      }
+      address {
+        principalStreet
+        secondaryStreet
+        city
+        directions
+      }
+    }
+  }
+`;
 const useStyles = makeStyles((theme) => ({
   root: {
     paddingTop: "2vh",
@@ -79,12 +193,37 @@ const useStyles = makeStyles((theme) => ({
   },
   controlPanel: {
     marginTop: "2vh",
+    width: "90%",
+  },
+  buttonContainer: {
+    margin: "0 2vw",
+    width: "90%",
+  },
+  buttonSelected: {
+    backgroundColor: theme.palette.secondary.dark,
+    "&:hover": {
+      backgroundColor: theme.palette.secondary.main,
+    },
+  },
+  buttonNotSelected: {
+    backgroundColor: theme.palette.primary.light,
+    "&:hover": {
+      backgroundColor: theme.palette.info.dark,
+    },
+  },
+  textField: {
+    backgroundColor: theme.palette.primary.contrastText,
+    margin: "2vh 0vw 0.5vh",
+    paddingTop: "1vh",
+    width: "99%",
+    borderRadius: 10,
   },
   vehMap: {
-    maxHeight: "85vh",
+    maxHeight: "90vh",
     display: "flex",
     flexDirection: "column",
     overflow: "scroll",
+    margin: "0 0vw 0 1vw",
   },
   divMapContainer: {
     margin: theme.spacing(0, 2, 0, 2),
@@ -126,8 +265,9 @@ function Track(props) {
   const classes = useStyles();
 
   //local variables
-  const [latitudInicial] = React.useState(-0.41000068);
-  const [longitudInicial] = React.useState(-78.493335);
+  const [isInitializeValues, setIsInitializeValues] = React.useState(true);
+  const [latitudInicial, setLatitudInicial] = React.useState(-0.176663);
+  const [longitudInicial, setLongitudInicial] = React.useState(-78.4845227);
   const [latitud, setLatitud] = React.useState(latitudInicial);
   const [longitud, setLongitud] = React.useState(longitudInicial);
   const [mapZoom, setMapZoom] = React.useState(13);
@@ -141,100 +281,308 @@ function Track(props) {
     pollInterval: 3000,
   });
 
-  const [openCall, setOpenCall] = React.useState(false);
+  const stores = useQuery(STORES, {
+    variables: { token },
+    pollInterval: 300000,
+  });
 
+  const [openCall, setOpenCall] = React.useState(false);
+  const [latCall, setLatCall] = React.useState(null);
+  const [longCall, setLongCall] = React.useState(null);
+  const [delOrLoc, setDelOrLoc] = React.useState(true);
+
+  const [filterM, setFilterM] = React.useState("");
+  const [filterL, setFilterL] = React.useState("");
+  const [cityFilter, setCityFilter] = React.useState(
+    localStorage.citySelected ? localStorage.citySelected : "TODAS"
+  );
+  const [cities, setCities] = React.useState([]);
+  const [localesByCity, setLocalesByCity] = React.useState([]);
+  const [locales, setLocales] = React.useState([]);
   //FUNCTIONS
 
-  const onMarkerClick = (props, marker, e) => {
-    console.log(marker);
-    setactiveMarker(marker);
-    setshowingInfoWindow(true);
-  };
+  useEffect(() => {
+    if (stores.data) {
+      let localesTemp = stores.data.getStores.slice();
+      const citiesTemp = new Set();
+      for (const store of localesTemp) {
+        citiesTemp.add(store.address.city);
+      }
+      setCities(Array.from(citiesTemp));
 
-  const onMapClick = (props) => {
-    if (showingInfoWindow) {
-      setshowingInfoWindow(false);
-      // setactiveMarker(null);
+      if (cityFilter !== "TODAS") {
+        localesTemp = localesTemp.filter((el) => {
+          return el.address.city
+            .toLowerCase()
+            .includes(cityFilter.toLowerCase());
+        });
+        setLocalesByCity(localesTemp);
+        filterLocales(filterL, localesTemp);
+      } else {
+        setLocalesByCity(stores.data.getStores.slice());
+        filterLocales(filterL, stores.data.getStores.slice());
+      }
     }
-  };
+  }, [stores.data]);
 
-  const callSetActiveMarker = (marker) =>{
-    setactiveMarker(marker)
-  }
+  useEffect(() => {
+    if (stores.data) {
+      if (cityFilter !== "TODAS") {
+        const localesTemp = stores.data.getStores.slice().filter((el) => {
+          return el.address.city
+            .toLowerCase()
+            .includes(cityFilter.toLowerCase());
+        });
+        setLocalesByCity(localesTemp);
+        filterLocales(filterL, localesTemp);
+      } else {
+        setLocalesByCity(stores.data.getStores.slice());
+        filterLocales(filterL, stores.data.getStores.slice());
+      }
+    }
+  }, [cityFilter]);
+
+  const callSetActiveMarker = (marker) => {
+    setactiveMarker(marker);
+  };
 
   const openCallModal = () => {
     setOpenCall(true);
   };
   const closeCallModal = () => {
     setOpenCall(false);
+    setLatCall(null);
+    setLongCall(null);
   };
   const recenter = (order) => {
-    console.log(order);
-    setMapZoom(16);
-    setLatitud(order.lastLatitude);
-    setLongitud(order.lastLongitude);
+    if (mapZoom === 16) {
+      setMapZoom(15);
+    } else {
+      setMapZoom(16);
+    }
+    setShowRoute(false);
+    setLatitud(order.lastPosition.latitude);
+    setLongitud(order.lastPosition.longitude);
+  };
+  const showOffice = (position) => {
+    if (mapZoom === 16) {
+      setMapZoom(15);
+    } else {
+      setMapZoom(16);
+    }
+    setShowRoute(false);
+    setLatitud(position.latitude);
+    setLongitud(position.longitude);
   };
 
   const destinoCenter = (order) => {
-    console.log(order);
-    setMapZoom(16);
-    setLatitud(order.destinationLatitude);
-    setLongitud(order.destinationLongitude);
+    if (mapZoom === 16) {
+      setMapZoom(15);
+    } else {
+      setMapZoom(16);
+    }
+    setShowRoute(false);
+    setLatitud(order.currentRoute.order.destination.latitude);
+    setLongitud(order.currentRoute.order.destination.longitude);
   };
 
-  const showOrderRoute = (order) =>{
-    console.log(order)
-    setShowRoute(true);
+  const showOrderRoute = (order) => {
     const data = [
       {
-        // lat: order.lastLatitude,
-        // lng: order.lastLongitude,
-        lat: -0.0413335,
-        lng: -78.493335
+        lat: order.lastPosition.latitude,
+        lng: order.lastPosition.longitude,
       },
-      { 
-        lat: order.destinationLatitude,
-        lng: order.destinationLongitude,
-      }
+      {
+        lat: order.currentRoute.order.destination.latitude,
+        lng: order.currentRoute.order.destination.longitude,
+      },
     ];
-    setDataToShowRoute(data)
-  }
+    setDataToShowRoute(data);
+    setShowRoute(true);
+  };
+
+  const filterMotorizados = (e) => {
+    if (e.target.value) {
+      setFilterM(e.target.value.toLowerCase());
+    } else {
+      setFilterM("");
+    }
+  };
+
+  const filterLocales = (text, localesAux) => {
+    if (text) {
+      setFilterL(text.toLowerCase());
+      const auxLocales = localesAux.slice().filter((el) => {
+        return (
+          el.name.toLowerCase().includes(text.toLowerCase()) ||
+          el.code.toLowerCase().includes(text.toLowerCase()) ||
+          el.address.city.toLowerCase().includes(text.toLowerCase())
+        );
+      });
+      setLocales(auxLocales);
+    } else {
+      setFilterL("");
+      setLocales(localesAux);
+    }
+  };
 
   if (loading) return <Loading />;
   if (error) return <Error error={error} />;
   if (data) {
-    let transformed = data.getSystemStats.deliveriesWithActiveRoutes;
-    const deliveriesData = data.getSystemStats.deliveries;
-    transformed = transformed.map((summary) => {
-      const found = deliveriesData.find((d) => d.name === summary.delivery);
-      if (found) {
-        summary.receipment = found.currentRoute;
-        summary.ordersAssigned = found.ordersAssigned;
+    if (data.getSystemStats) {
+      if (isInitializeValues) {
+        if (data.getSystemStats.deliveriesWithActiveRoutes.length > 0) {
+          if (data.getSystemStats.deliveriesWithActiveRoutes[0].lastLatitude) {
+            setLatitudInicial(
+              data.getSystemStats.deliveriesWithActiveRoutes[0].lastLatitude
+            );
+            setLongitudInicial(
+              data.getSystemStats.deliveriesWithActiveRoutes[0].lastLongitude
+            );
+            setLatitud(
+              data.getSystemStats.deliveriesWithActiveRoutes[0].lastLatitude
+            );
+            setLongitud(
+              data.getSystemStats.deliveriesWithActiveRoutes[0].lastLongitude
+            );
+          }
+        }
+        setIsInitializeValues(false);
       }
+    }
 
-      return summary;
-    });
+    let transformed = data.getSystemStats
+      ? data.getSystemStats.deliveries.slice()
+      : [];
+
+    if (cityFilter !== "TODAS") {
+      transformed = transformed.filter((el) => {
+        return el.city.toLowerCase().includes(cityFilter.toLowerCase());
+      });
+    }
+
+    if (filterM) {
+      transformed = transformed.filter((el) => {
+        return (
+          el.name.toLowerCase().includes(filterM) ||
+          el.firstName.toLowerCase().includes(filterM) ||
+          el.lastName.toLowerCase().includes(filterM)
+        );
+      });
+    }
 
     return (
       <div className={classes.root}>
-        <Header openCallModal={openCallModal} history={props.history} />
+        <Header
+          openCallModal={openCallModal}
+          history={props.history}
+          setCityFilter={setCityFilter}
+          cityFilter={cityFilter}
+          cities={cities}
+        />
         <Grid container>
           <Grid item xs={12} md={3} className={classes.controlPanel}>
-            <div className={classes.vehMap}>
-              {transformed
-                ? transformed.map((order) => {
-                    return (
-                      <MotorizadoInfo
-                        order={order}
-                        key={order.tripId}
-                        recenter={recenter}
-                        destinoCenter={destinoCenter}
-                        showOrderRoute = {showOrderRoute}
-                      />
-                    );
-                  })
-                : null}
-            </div>
+            <Grid container className={classes.buttonContainer}>
+              <Grid item xs={6}>
+                <Button
+                  fullWidth
+                  className={
+                    delOrLoc
+                      ? classes.buttonSelected
+                      : classes.buttonNotSelected
+                  }
+                  onClick={() => setDelOrLoc(true)}
+                >
+                  DELIVERIES
+                </Button>
+              </Grid>
+              <Grid item xs={6}>
+                <Button
+                  fullWidth
+                  className={
+                    !delOrLoc
+                      ? classes.buttonSelected
+                      : classes.buttonNotSelected
+                  }
+                  onClick={() => setDelOrLoc(false)}
+                >
+                  LOCALES
+                </Button>
+              </Grid>
+            </Grid>
+            {delOrLoc ? (
+              <div className={classes.vehMap}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Motorizado"
+                  className={classes.textField}
+                  value={filterM}
+                  onChange={(e) => {
+                    filterMotorizados(e);
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <IconButton>
+                          <SearchIcon color="primary" />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                {transformed
+                  ? transformed.map((order, index) => {
+                      return (
+                        <MotorizadoInfo
+                          order={order}
+                          key={index}
+                          recenter={recenter}
+                          showOffice={showOffice}
+                          destinoCenter={destinoCenter}
+                          showOrderRoute={showOrderRoute}
+                        />
+                      );
+                    })
+                  : null}
+              </div>
+            ) : (
+              <div className={classes.vehMap}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Locales"
+                  className={classes.textField}
+                  value={filterL}
+                  onChange={(e) => {
+                    filterLocales(e.target.value, localesByCity);
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <IconButton>
+                          <SearchIcon color="primary" />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                {locales
+                  ? locales.map((order, index) => {
+                      return (
+                        <LocalInfo
+                          order={order}
+                          key={index}
+                          recenter={recenter}
+                          destinoCenter={destinoCenter}
+                          showOrderRoute={showOrderRoute}
+                          motorizados={data.getSystemStats.deliveries}
+                        />
+                      );
+                    })
+                  : null}
+              </div>
+            )}
           </Grid>
           <Grid item sm={12} md={9}>
             <MapContainerF
@@ -248,6 +596,9 @@ function Track(props) {
               callSetActiveMarker={callSetActiveMarker}
               setshowingInfoWindow={setshowingInfoWindow}
               showingInfoWindow={showingInfoWindow}
+              setOpenCall={setOpenCall}
+              setLatCall={setLatCall}
+              setLongCall={setLongCall}
             />
           </Grid>
         </Grid>
@@ -257,7 +608,11 @@ function Track(props) {
           className={classes.modal}
         >
           <div>
-            <CallMotorizado motorizados={data.getSystemStats.deliveries} />
+            <CallMotorizado
+              motorizados={data.getSystemStats?data.getSystemStats.deliveries:[]}
+              latCall={latCall}
+              longCall={longCall}
+            />
           </div>
         </Modal>
       </div>
