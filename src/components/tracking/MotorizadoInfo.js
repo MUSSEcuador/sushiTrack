@@ -67,14 +67,14 @@ const useStyles = makeStyles((theme) => ({
   },
   called: {
     position: "absolute",
-    left: "3px",
+    left: "5px",
     top: "2px",
     width: "5px",
     color: theme.palette.primary.main,
   },
   cancelCall: {
     position: "absolute",
-    left: "28px",
+    left: "45px",
     top: "2px",
     width: "5px",
     color: theme.palette.primary.main,
