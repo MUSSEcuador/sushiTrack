@@ -1,6 +1,9 @@
 import React from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
+import { gql } from "apollo-boost";
+import { useMutation } from "@apollo/react-hooks";
+
 import moment from "moment";
 import {
   Grid,
@@ -16,9 +19,19 @@ import AirportShuttleIcon from "@material-ui/icons/AirportShuttle";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
+import CallEndIcon from '@material-ui/icons/CallEnd';
 import EmojiTransportationIcon from '@material-ui/icons/EmojiTransportation';
 
 import OrderInfo from "./OrderInfo";
+
+const CANCEL_CALL = gql`
+  mutation StopCallDeliveryToOffice(
+    $callDeliveryDetail: CallDelivery
+    $token: String!
+  ) {
+    stopCallDeliveryToOffice(callDeliveryDetail: $callDeliveryDetail, token: $token)
+  }
+`;
 
 const useStyles = makeStyles((theme) => ({
   withRoute: {
@@ -54,8 +67,16 @@ const useStyles = makeStyles((theme) => ({
   },
   called: {
     position: "absolute",
-    left: "4px",
+    left: "3px",
     top: "2px",
+    width: "5px",
+    color: theme.palette.primary.main,
+  },
+  cancelCall: {
+    position: "absolute",
+    left: "28px",
+    top: "2px",
+    width: "5px",
     color: theme.palette.primary.main,
   },
   vehTitle: {
@@ -91,6 +112,7 @@ function MotorizadoInfo(props) {
   const { order, recenter, destinoCenter, showOrderRoute, showOffice } = props;
 
   const [openInfo, setOpenInfo] = React.useState(false);
+  const [stopCallDeliveryToOffice, { data }] = useMutation(CANCEL_CALL);
 
   const getLastUpdate = () => {
     if (order.lastUpdate) {
@@ -111,6 +133,34 @@ function MotorizadoInfo(props) {
     setOpenInfo(false);
   };
 
+  const onCancelCall = (param)=>{
+    console.log(param);
+    const auxCallData = {
+      deliveryId: order.name,
+      officeAddress: {
+        principalStreet: order.returningToOffice.officeLocation.principalStreet,
+        directions: order.returningToOffice.officeLocation.directions,
+      },
+      officePosition: {
+        latitude: order.returningToOffice.officePosition.latitude,
+        longitude: order.returningToOffice.officePosition.longitude,
+      },
+    };
+
+    stopCallDeliveryToOffice({
+      variables: {
+        token: sessionStorage.token,
+        callDeliveryDetail: auxCallData,
+      },
+    })
+      .then((r) => {
+        console.log(r.data)
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
   return (
     <div>
       <Box
@@ -127,6 +177,7 @@ function MotorizadoInfo(props) {
           </p>
         ) : null}
         {order.returningToOffice ? (
+          <div>
           <Tooltip title="Regresando a local" enterDelay={400} leaveDelay={200}>
             <InputAdornment position="start">
               <IconButton
@@ -139,6 +190,19 @@ function MotorizadoInfo(props) {
               </IconButton>
             </InputAdornment>
           </Tooltip>
+          <Tooltip title="Cancelar llamada" enterDelay={400} leaveDelay={200}>
+            <InputAdornment position="start">
+              <IconButton
+                className={classes.cancelCall}
+                onClick={(e) => {
+                  onCancelCall(order);
+                }}
+              >
+                <CallEndIcon/>
+              </IconButton>
+            </InputAdornment>
+          </Tooltip>
+          </div>
         ) : null}
 
         <Typography className={classes.vehTitle}> {order.name}</Typography>
