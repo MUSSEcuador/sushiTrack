@@ -112,7 +112,7 @@ function MotorizadoInfo(props) {
   const { order, recenter, destinoCenter, showOrderRoute, showOffice } = props;
 
   const [openInfo, setOpenInfo] = React.useState(false);
-  const [stopCallDeliveryToOffice, { data }] = useMutation(CANCEL_CALL);
+  const [stopCallDeliveryToOffice] = useMutation(CANCEL_CALL);
 
   const getLastUpdate = () => {
     if (order.lastUpdate) {

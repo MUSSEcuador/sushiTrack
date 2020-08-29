@@ -94,7 +94,7 @@ function CallMotorizado(props) {
   const [filter, setFilter] = React.useState("");
   const [seleccionado, setSeleccionado] = React.useState(null);
   const [openSnack, setOpenSnack] = React.useState(false);
-  const [callDeliveryToOffice, { data }] = useMutation(CALL_DELIVERY);
+  const [callDeliveryToOffice] = useMutation(CALL_DELIVERY);
 
   const filterMotorizados = (e) => {
     setFilter(e.target.value);
