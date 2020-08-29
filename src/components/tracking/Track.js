@@ -302,6 +302,7 @@ function Track(props) {
   //FUNCTIONS
 
   useEffect(() => {
+    
     if (stores.data) {
       let localesTemp = stores.data.getStores.slice();
       const citiesTemp = new Set();
