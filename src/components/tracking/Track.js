@@ -17,7 +17,6 @@ import Loading from "../common/Loading";
 import Error from "../common/Error";
 import Header from "../common/Header";
 import MotorizadoInfo from "./MotorizadoInfo";
-import CallMotorizado from "./CallMotorizado";
 import LocalInfo from "./LocalInfo";
 
 const DATOS = gql`
@@ -297,8 +296,6 @@ function Track(props) {
     pollInterval: 300000,
   });
 
-  const [latCall, setLatCall] = React.useState(null);
-  const [longCall, setLongCall] = React.useState(null);
   const [delOrLoc, setDelOrLoc] = React.useState(true);
 
   const [filterM, setFilterM] = React.useState("");
@@ -608,8 +605,6 @@ function Track(props) {
               callSetActiveMarker={callSetActiveMarker}
               setshowingInfoWindow={setshowingInfoWindow}
               showingInfoWindow={showingInfoWindow}
-              setLatCall={setLatCall}
-              setLongCall={setLongCall}
             />
           </Grid>
         </Grid>
