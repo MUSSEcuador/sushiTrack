@@ -13,16 +13,28 @@ const useStyles = makeStyles((theme) => ({
   buttonGroup: {
     color: "rgb(255,255,255)",
     marginRight: "10vw",
+    //width: "20vw",
+    [theme.breakpoints.down("sm")]: {
+      width: "99vw"
+    },
   },
   button: {
-    color: theme.palette.primary.contrastText,
-    marginLeft: "0.2vw",
-  },
-  buttonSelect: {
     color: theme.palette.secondary.light,
     backgroundColor: theme.palette.primary.contrastText,
+    marginLeft: "0.2vw",
+    [theme.breakpoints.down("xs")]: {
+      fontSize: "0.5em",
+      marginLeft: "0x"
+    },
+  },
+  buttonSelect: {
+    color: theme.palette.primary.contrastText,
+
     fontSize: "1.1em",
     marginLeft: "0.2vw",
+    [theme.breakpoints.down("xs")]: {
+      fontSize: "0.5em",
+    },
   },
   logoContainer: {
     textAlign: "left",
@@ -40,10 +52,10 @@ function Header(props) {
   return (
     <div className={classes.root}>
       <Grid container>
-        <Grid item xs={6} className={classes.logoContainer}>
+        <Grid item xs={12}  md={3} className={classes.logoContainer}>
           <img alt="logo" src="/img/logo.png" className={classes.logo}></img>
         </Grid>
-        <Grid item xs={6} className={classes.buttonsContainer}>
+        <Grid item xs={12} md={9}  className={classes.buttonsContainer}>
           <ButtonGroup
             variant="contained"
             color="secondary"
@@ -55,7 +67,7 @@ function Header(props) {
                     setCityFilter("TODAS");
                   }}>
               TODAS
-            </Button>
+            </Button>      
             {cities.map((el, index) => {
               return (
                 <Button
@@ -77,7 +89,7 @@ function Header(props) {
             aria-label="text primary button group"
           >
             <Button
-              className={classes.button}
+              className={classes.buttonSelect}
               onClick={() => {
                 sessionStorage.removeItem("token");
                 history.push("/login");

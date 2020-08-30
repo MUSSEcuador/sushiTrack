@@ -188,8 +188,12 @@ const STORES = gql`
 const useStyles = makeStyles((theme) => ({
   root: {
     paddingTop: "2vh",
-    height: "100vh",
+    //height: "100vh",
+    width: "100vw",
     backgroundColor: theme.palette.primary.dark,
+    [theme.breakpoints.up("md")]: {
+      height: "100vh"
+    },
   },
   controlPanel: {
     marginTop: "0vh",
@@ -198,6 +202,9 @@ const useStyles = makeStyles((theme) => ({
   buttonContainer: {
     margin: "0 2vw",
     width: "90%",
+    [theme.breakpoints.down("sm")]: {
+      alignItems: "center",
+    },
   },
   buttonSelected: {
     backgroundColor: theme.palette.secondary.dark,
@@ -218,6 +225,10 @@ const useStyles = makeStyles((theme) => ({
     width: "90%",
     height: "4vh",
     borderRadius: 10,
+    [theme.breakpoints.down("sm")]: {
+      alignItems: "center",
+      width: "50vw",
+    },
   },
   vehMap: {
     maxHeight: "70vh",
@@ -225,6 +236,10 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     overflow: "scroll",
     margin: "0 0vw 0 1vw",
+    [theme.breakpoints.down("sm")]: {
+      alignItems: "center",
+      width: "100vw",
+    },
   },
   divMapContainer: {
     margin: theme.spacing(0, 2, 0, 2),
@@ -244,7 +259,7 @@ const useStyles = makeStyles((theme) => ({
     },
     [theme.breakpoints.down("sm")]: {
       margin: "2vh 2vw 0 2vw",
-      width: "90vw",
+      width: "100vw",
     },
   },
   infoWindowTitle: {

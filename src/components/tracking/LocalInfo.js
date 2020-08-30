@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: "2px 2px 5px rgb(100,100,100)",
     backgroundColor: theme.palette.primary.light,
     [theme.breakpoints.down("sm")]: {
-      width: "80%",
+      width: "95%",
     },
     position: "relative",
   },
@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: "2px 2px 5px rgb(100,100,100)",
     backgroundColor: theme.palette.error.light,
     [theme.breakpoints.down("sm")]: {
-      width: "80%",
+      width: "95%",
     },
     position: "relative",
   },
