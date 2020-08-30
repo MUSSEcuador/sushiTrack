@@ -8,7 +8,7 @@ import EsperaInfo from "./EsperaInfo";
 const useStyles = makeStyles((theme) => ({
   root: {
     boxShadow: "3px 3px 25px rgb(0,0,0)",
-    height: "70vh",
+    height: "75vh",
     width: "70vw",
     color: theme.palette.secondary.main,
     backgroundColor: theme.palette.primary.light,

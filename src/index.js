@@ -8,7 +8,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 const client = new ApolloClient({
- // uri: 'http://192.168.100.3:2000/graphql',
+  // uri: 'http://192.168.100.3:2000/graphql',
  uri: 'https://sushi-tracking.azurewebsites.net/graphql', 
 });
 

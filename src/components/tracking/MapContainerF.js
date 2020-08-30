@@ -40,7 +40,6 @@ const useStyles = makeStyles((theme) => ({
 function MapContainerF(props) {
   const classes = useStyles();
 
-  const { setOpenCall, setLatCall, setLongCall } = props;
   const [mapInstance, setMapInstance] = useState(null);
   const [showRouteOnMap, setShowRouteOnMap] = useState(false);
   const [displayServiceInstance, setDisplayServiceInstance] = useState(null);
@@ -147,11 +146,6 @@ function MapContainerF(props) {
         onReady={handleMapReady}
         onClick={(props, marker, event) => {
           onMapClick(props);
-        }}
-        onRightclick={(props, marker, event) => {
-          setOpenCall(true);
-          setLatCall(event.latLng.lat());
-          setLongCall(event.latLng.lng());
         }}
       >
         {destinations.map((elTrack, index) => {

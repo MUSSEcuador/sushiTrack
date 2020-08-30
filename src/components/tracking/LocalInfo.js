@@ -40,10 +40,10 @@ const useStyles = makeStyles((theme) => ({
   alerta: {
     position: "absolute",
     right: "4px",
-    top: "4px",
-    width: "35%",
-    fontWeight: 500,
-    fontSize: 11,
+    top: "1px",
+    width: "30%",
+    fontWeight: 100,
+    fontSize: "9px",
     color: theme.palette.secondary.dark,
     padding: "0.5vh 0 0 0",
     boxShadow: "2px 2px 5px rgb(100,100,100)",
@@ -70,7 +70,7 @@ const useStyles = makeStyles((theme) => ({
   },
   modal: {
     marginLeft: "30vw",
-    marginTop: "20vh",
+    marginTop: "10vh",
     marginRight: "30vw",
   },
 }));

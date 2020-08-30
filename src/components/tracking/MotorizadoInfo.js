@@ -19,8 +19,8 @@ import AirportShuttleIcon from "@material-ui/icons/AirportShuttle";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
-import CallEndIcon from '@material-ui/icons/CallEnd';
-import EmojiTransportationIcon from '@material-ui/icons/EmojiTransportation';
+import CallEndIcon from "@material-ui/icons/CallEnd";
+import EmojiTransportationIcon from "@material-ui/icons/EmojiTransportation";
 
 import OrderInfo from "./OrderInfo";
 
@@ -29,7 +29,10 @@ const CANCEL_CALL = gql`
     $callDeliveryDetail: CallDelivery
     $token: String!
   ) {
-    stopCallDeliveryToOffice(callDeliveryDetail: $callDeliveryDetail, token: $token)
+    stopCallDeliveryToOffice(
+      callDeliveryDetail: $callDeliveryDetail
+      token: $token
+    )
   }
 `;
 
@@ -57,13 +60,13 @@ const useStyles = makeStyles((theme) => ({
   alerta: {
     position: "absolute",
     right: "4px",
-    top: "4px",
-    width: "35%",
+    top: "1px",
+    width: "30%",
     fontWeight: 500,
-    fontSize: 11,
+    fontSize: "9px",
     color: theme.palette.secondary.dark,
-    padding: "0.5vh 0 0 0",
-    boxShadow: "2px 2px 5px rgb(100,100,100)",
+    padding: "0 0",
+    boxShadow: "2px 2px 3px rgb(100,100,100)",
   },
   called: {
     position: "absolute",
@@ -133,7 +136,7 @@ function MotorizadoInfo(props) {
     setOpenInfo(false);
   };
 
-  const onCancelCall = (param)=>{
+  const onCancelCall = (param) => {
     console.log(param);
     const auxCallData = {
       deliveryId: order.name,
@@ -154,12 +157,12 @@ function MotorizadoInfo(props) {
       },
     })
       .then((r) => {
-        console.log(r.data)
+        console.log(r.data);
       })
       .catch((err) => {
         console.log(err);
       });
-  }
+  };
 
   return (
     <div>
@@ -178,30 +181,36 @@ function MotorizadoInfo(props) {
         ) : null}
         {order.returningToOffice ? (
           <div>
-          <Tooltip title="Regresando a local" enterDelay={400} leaveDelay={200}>
-            <InputAdornment position="start">
-              <IconButton
-                className={classes.called}
-                onClick={(e) => {
-                  showOffice(order.returningToOffice.officePosition);
-                }}
-              >
-                <EmojiTransportationIcon />
-              </IconButton>
-            </InputAdornment>
-          </Tooltip>
-          <Tooltip title="Cancelar llamada" enterDelay={400} leaveDelay={200}>
-            <InputAdornment position="start">
-              <IconButton
-                className={classes.cancelCall}
-                onClick={(e) => {
-                  onCancelCall(order);
-                }}
-              >
-                <CallEndIcon/>
-              </IconButton>
-            </InputAdornment>
-          </Tooltip>
+            <Tooltip
+              title="Regresando a local"
+              enterDelay={400}
+              leaveDelay={200}
+            >
+              <InputAdornment position="start">
+                <IconButton
+                  className={classes.called}
+                  onClick={(e) => {
+                    if (order.returningToOffice.officePosition) {
+                      showOffice(order.returningToOffice.officePosition);
+                    }
+                  }}
+                >
+                  <EmojiTransportationIcon />
+                </IconButton>
+              </InputAdornment>
+            </Tooltip>
+            <Tooltip title="Cancelar llamada" enterDelay={400} leaveDelay={200}>
+              <InputAdornment position="start">
+                <IconButton
+                  className={classes.cancelCall}
+                  onClick={(e) => {
+                    onCancelCall(order);
+                  }}
+                >
+                  <CallEndIcon />
+                </IconButton>
+              </InputAdornment>
+            </Tooltip>
           </div>
         ) : null}
 

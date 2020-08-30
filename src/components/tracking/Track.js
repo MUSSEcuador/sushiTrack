@@ -5,7 +5,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { gql } from "apollo-boost";
 import { useQuery } from "@apollo/react-hooks";
 
-import { Grid, Modal, TextField, IconButton, Button } from "@material-ui/core";
+import { Grid, TextField, IconButton, Button } from "@material-ui/core";
 
 import InputAdornment from "@material-ui/core/InputAdornment";
 import SearchIcon from "@material-ui/icons/Search";
@@ -192,7 +192,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.primary.dark,
   },
   controlPanel: {
-    marginTop: "2vh",
+    marginTop: "0vh",
     width: "90%",
   },
   buttonContainer: {
@@ -213,13 +213,14 @@ const useStyles = makeStyles((theme) => ({
   },
   textField: {
     backgroundColor: theme.palette.primary.contrastText,
-    margin: "2vh 0vw 0.5vh",
+    margin: "2vh 0vw 0.5vh 2vw",
     paddingTop: "1vh",
-    width: "99%",
+    width: "90%",
+    height: "4vh",
     borderRadius: 10,
   },
   vehMap: {
-    maxHeight: "90vh",
+    maxHeight: "70vh",
     display: "flex",
     flexDirection: "column",
     overflow: "scroll",
@@ -253,11 +254,6 @@ const useStyles = makeStyles((theme) => ({
   infoWindowText: {
     color: "black",
   },
-  modal: {
-    marginLeft: "30vw",
-    marginTop: "20vh",
-    marginRight: "30vw",
-  },
 }));
 
 function Track(props) {
@@ -286,7 +282,6 @@ function Track(props) {
     pollInterval: 300000,
   });
 
-  const [openCall, setOpenCall] = React.useState(false);
   const [latCall, setLatCall] = React.useState(null);
   const [longCall, setLongCall] = React.useState(null);
   const [delOrLoc, setDelOrLoc] = React.useState(true);
@@ -302,7 +297,6 @@ function Track(props) {
   //FUNCTIONS
 
   useEffect(() => {
-    
     if (stores.data) {
       let localesTemp = stores.data.getStores.slice();
       const citiesTemp = new Set();
@@ -347,14 +341,6 @@ function Track(props) {
     setactiveMarker(marker);
   };
 
-  const openCallModal = () => {
-    setOpenCall(true);
-  };
-  const closeCallModal = () => {
-    setOpenCall(false);
-    setLatCall(null);
-    setLongCall(null);
-  };
   const recenter = (order) => {
     if (mapZoom === 16) {
       setMapZoom(15);
@@ -475,7 +461,6 @@ function Track(props) {
     return (
       <div className={classes.root}>
         <Header
-          openCallModal={openCallModal}
           history={props.history}
           setCityFilter={setCityFilter}
           cityFilter={cityFilter}
@@ -511,44 +496,52 @@ function Track(props) {
                 </Button>
               </Grid>
             </Grid>
+
             {delOrLoc ? (
-              <div className={classes.vehMap}>
-                <TextField
-                  size="small"
-                  fullWidth
-                  placeholder="Motorizado"
-                  className={classes.textField}
-                  value={filterM}
-                  onChange={(e) => {
-                    filterMotorizados(e);
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <IconButton>
-                          <SearchIcon color="primary" />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                {transformed
-                  ? transformed.map((order, index) => {
-                      return (
-                        <MotorizadoInfo
-                          order={order}
-                          key={index}
-                          recenter={recenter}
-                          showOffice={showOffice}
-                          destinoCenter={destinoCenter}
-                          showOrderRoute={showOrderRoute}
-                        />
-                      );
-                    })
-                  : null}
+              <div>
+                <div>
+                  <TextField
+                    size="small"
+                    fullWidth
+                    placeholder="Motorizado"
+                    className={classes.textField}
+                    value={filterM}
+                    onChange={(e) => {
+                      filterMotorizados(e);
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <IconButton>
+                            <SearchIcon color="primary" />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </div>
+                <div className={classes.vehMap}>
+                  {transformed
+                    ? transformed.map((order, index) => {
+                        return (
+                          <MotorizadoInfo
+                            order={order}
+                            key={index}
+                            recenter={recenter}
+                            showOffice={showOffice}
+                            destinoCenter={destinoCenter}
+                            showOrderRoute={showOrderRoute}
+                          />
+                        );
+                      })
+                    : null}
+                </div>
               </div>
             ) : (
-              <div className={classes.vehMap}>
+              <div>
+                <div>
+
+              
                 <TextField
                   size="small"
                   fullWidth
@@ -568,6 +561,8 @@ function Track(props) {
                     ),
                   }}
                 />
+                </div>
+              <div className={classes.vehMap}>
                 {locales
                   ? locales.map((order, index) => {
                       return (
@@ -583,6 +578,7 @@ function Track(props) {
                     })
                   : null}
               </div>
+              </div>
             )}
           </Grid>
           <Grid item sm={12} md={9}>
@@ -597,25 +593,11 @@ function Track(props) {
               callSetActiveMarker={callSetActiveMarker}
               setshowingInfoWindow={setshowingInfoWindow}
               showingInfoWindow={showingInfoWindow}
-              setOpenCall={setOpenCall}
               setLatCall={setLatCall}
               setLongCall={setLongCall}
             />
           </Grid>
         </Grid>
-        <Modal
-          open={openCall}
-          onClose={closeCallModal}
-          className={classes.modal}
-        >
-          <div>
-            <CallMotorizado
-              motorizados={data.getSystemStats?data.getSystemStats.deliveries:[]}
-              latCall={latCall}
-              longCall={longCall}
-            />
-          </div>
-        </Modal>
       </div>
     );
   }

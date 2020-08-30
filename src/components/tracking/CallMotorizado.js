@@ -27,7 +27,7 @@ const CALL_DELIVERY = gql`
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    height: "60vh",
+    height: "70vh",
     width: "50vw",
     backgroundColor: theme.palette.primary.light,
     boxShadow: "3px 3px 25px rgb(0,0,0)",
@@ -35,8 +35,8 @@ const useStyles = makeStyles((theme) => ({
   },
   titleContainer: {
     backgroundColor: theme.palette.primary.main,
-    height: "12%",
-    paddingTop: "2vh",
+    height: "9%",
+    paddingTop: "1vh",
   },
   contentContainer: {
     padding: "3vh 8vw",
@@ -44,12 +44,13 @@ const useStyles = makeStyles((theme) => ({
   title: {
     color: theme.palette.secondary.light,
     fontWeight: 300,
-    fontSize: "1.8em",
+    fontSize: "1.5em",
     [theme.breakpoints.down("md")]: {
-      fontSize: "1.3em",
+      fontSize: "1.1em",
     },
   },
   motorizadosContainer: {
+    minHeight: "20vh",
     maxHeight: "40vh",
     display: "flex",
     flexDirection: "column",
@@ -62,7 +63,7 @@ const useStyles = makeStyles((theme) => ({
   },
   button: {
     position: "absolute",
-    bottom: "10%",
+    bottom: "6%",
     left: "30%",
     width: "40%",
     backgroundColor: theme.palette.primary.dark,
