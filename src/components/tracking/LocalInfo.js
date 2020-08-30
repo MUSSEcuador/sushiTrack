@@ -69,9 +69,13 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: "1vw",
   },
   modal: {
-    marginLeft: "30vw",
-    marginTop: "10vh",
-    marginRight: "30vw",
+    marginLeft: "15vw",
+    marginTop: "15vh",
+    marginRight: "15vw",
+    [theme.breakpoints.down("md")]: {
+      marginLeft: "10vw",
+    marginRight: "10vw",
+    },
   },
 }));
 

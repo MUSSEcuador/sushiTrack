@@ -28,10 +28,13 @@ const CALL_DELIVERY = gql`
 const useStyles = makeStyles((theme) => ({
   root: {
     height: "70vh",
-    width: "50vw",
+    width: "70vw",
     backgroundColor: theme.palette.primary.light,
     boxShadow: "3px 3px 25px rgb(0,0,0)",
     position: "relative",
+    [theme.breakpoints.down("md")]: {
+      width: "80vh",
+    },
   },
   titleContainer: {
     backgroundColor: theme.palette.primary.main,
@@ -46,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 300,
     fontSize: "1.5em",
     [theme.breakpoints.down("md")]: {
-      fontSize: "1.1em",
+      fontSize: "0.8em",
     },
   },
   motorizadosContainer: {
@@ -57,6 +60,11 @@ const useStyles = makeStyles((theme) => ({
     overflow: "scroll",
     boxShadow: "1px 1px 2px rgb(220,220,220)",
     marginBottom: "2vh",
+    [theme.breakpoints.down("sm")]: {
+      maxHeight: "20vh",
+      fontSize: "0.8"
+    },
+
   },
   seleccionado: {
     padding: "0 2vw",

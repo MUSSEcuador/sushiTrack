@@ -9,7 +9,7 @@ const useStyles = makeStyles((theme) => ({
   root: {
     boxShadow: "3px 3px 25px rgb(0,0,0)",
     height: "75vh",
-    width: "70vw",
+    width: "80vw",
     color: theme.palette.secondary.main,
     backgroundColor: theme.palette.primary.light,
     textAlign: "center",
@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "2em",
     [theme.breakpoints.down("sm")]: {
       fontWeight: 500,
-      fontSize: "1.5em",
+      fontSize: "1.2em",
     },
   },
   divisionText: {
@@ -45,6 +45,10 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.secondary.contrastText,
     fontWeight: 100,
     fontSize: "1.2em",
+    [theme.breakpoints.down("sm")]: {
+      fontWeight: 500,
+      fontSize: "0.8em",
+    },
   },
   espera: {
     maxHeight: "12vh",
