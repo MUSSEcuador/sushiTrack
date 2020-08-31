@@ -70,12 +70,9 @@ const useStyles = makeStyles((theme) => ({
   },
   modal: {
     marginLeft: "15vw",
-    marginTop: "15vh",
-    marginRight: "15vw",
-    [theme.breakpoints.down("md")]: {
-      marginLeft: "10vw",
-    marginRight: "10vw",
-    },
+    marginTop: "10vh",
+    marginRight: "25vw",
+
   },
 }));
 

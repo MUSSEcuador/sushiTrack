@@ -1,7 +1,7 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 
-import { Typography, Link, Modal } from "@material-ui/core";
+import { Typography, Link, Modal, Paper } from "@material-ui/core";
 
 import EsperaInfo from "./EsperaInfo";
 
@@ -13,6 +13,7 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.secondary.main,
     backgroundColor: theme.palette.primary.light,
     textAlign: "center",
+    outline: 0,
   },
   titleContainer: {
     backgroundColor: theme.palette.primary.main,
@@ -62,8 +63,8 @@ const useStyles = makeStyles((theme) => ({
   },
   modal: {
     marginLeft: "22vw",
-    marginTop: "22vh",
-    marginRight: "22vw",
+    marginTop: "20vh",
+    marginRight: "52vw",
   },
 }));
 
@@ -104,7 +105,7 @@ function OrderInfo(props) {
 
 
   return (
-    <div className={classes.root}>
+    <Paper className={classes.root}>
       <div className={classes.titleContainer}>
         <Typography className={classes.title} align="center">
           {order.name}
@@ -182,7 +183,7 @@ function OrderInfo(props) {
           <EsperaInfo ordersAssigned={esperaToShow} />
         </div>
       </Modal>
-    </div>
+    </Paper>
   );
 }
 

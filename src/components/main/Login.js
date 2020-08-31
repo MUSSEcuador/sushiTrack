@@ -11,7 +11,9 @@ import {
   TextField,
   Button,
   Snackbar,
+  Modal,
 } from "@material-ui/core";
+import Loading from "../common/Loading";
 
 const DATA_LOGIN = gql`
   mutation Login($username: String!, $password: String!) {
@@ -41,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
     margin: "1vh 3vw",
     width: "25vw",
     [theme.breakpoints.down("xs")]: {
-      width: "45vw",
+      width: "40vw",
     },
   },
   bienvenida: {
@@ -50,9 +52,9 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 500,
     fontSize: "4em",
     [theme.breakpoints.down("sm")]: {
-      marginTop: "5vh",
+      marginTop: "4vh",
       fontWeight: 300,
-      fontSize: "1.5em",
+      fontSize: "1.3em",
     },
   },
   title: {
@@ -61,6 +63,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 500,
     [theme.breakpoints.down("sm")]: {
       fontSize: "1em",
+      marginTop: "15vh",
     },
   },
   form: {
@@ -106,6 +109,7 @@ function Login(props) {
   const [userName, setUserName] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [openSnack, setOpenSnack] = React.useState(false);
+  const [openLoading, setOpenLoading] = React.useState(false);
 
   //const {loading, error, data} = useMutation(DATA_LOGIN);
 
@@ -115,9 +119,12 @@ function Login(props) {
 
   const submit = (e) => {
     e.preventDefault();
+    setOpenLoading(true);
     login({ variables: { username: userName, password: password } })
       .then(result => {
+        setOpenLoading(false);
         if (result.data?.login?.token) {
+
           sessionStorage.setItem('token',result.data.login.token);
           props.history.push("/track");
         } else {
@@ -206,6 +213,9 @@ function Login(props) {
       >
         <Typography>Su usuario y/o contraseña son incorrectos</Typography>
       </Snackbar>
+      <Modal openLoading={openLoading}>
+        <Loading></Loading>
+      </Modal>
     </div>
   );
 }

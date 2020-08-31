@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 300,
     fontSize: "1.9em",
     [theme.breakpoints.down("sm")]: {
-      fontSize: "1.3em",
+      fontSize: "0.9em",
     },
   },
   divisionText: {
@@ -41,6 +41,9 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.secondary.contrastText,
     fontWeight: 100,
     fontSize: "1.2em",
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "0.8em"
+    },
   },
   items: {
     maxHeight: "45%",
@@ -57,6 +60,9 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.secondary.contrastText,
     fontWeight: 100,
     fontSize: "1.1em",
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "0.8em"
+    },
   },
 }));
 

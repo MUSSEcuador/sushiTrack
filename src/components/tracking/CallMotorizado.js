@@ -27,14 +27,11 @@ const CALL_DELIVERY = gql`
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    height: "70vh",
+    height: "80vh",
     width: "70vw",
     backgroundColor: theme.palette.primary.light,
     boxShadow: "3px 3px 25px rgb(0,0,0)",
     position: "relative",
-    [theme.breakpoints.down("md")]: {
-      width: "80vh",
-    },
   },
   titleContainer: {
     backgroundColor: theme.palette.primary.main,
@@ -47,9 +44,9 @@ const useStyles = makeStyles((theme) => ({
   title: {
     color: theme.palette.secondary.light,
     fontWeight: 300,
-    fontSize: "1.5em",
+    fontSize: "1.2em",
     [theme.breakpoints.down("md")]: {
-      fontSize: "0.8em",
+      fontSize: "0.9em",
     },
   },
   motorizadosContainer: {
@@ -62,16 +59,24 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: "2vh",
     [theme.breakpoints.down("sm")]: {
       maxHeight: "20vh",
-      fontSize: "0.8"
+      fontSize: "0.9em"
     },
 
   },
+  listItem: {
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "0.8em"
+    },
+  },
   seleccionado: {
     padding: "0 2vw",
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "0.8em"
+    },
   },
   button: {
     position: "absolute",
-    bottom: "6%",
+    bottom: "2vh",
     left: "30%",
     width: "40%",
     backgroundColor: theme.palette.primary.dark,
@@ -193,12 +198,12 @@ function CallMotorizado(props) {
                   <Divider />
                   <ListItem
                     alignItems="flex-start"
-                    className={classes.listItem}
+                    
                     onClick={() => {
                       setSeleccionado(persona);
                     }}
                   >
-                    <Typography>
+                    <Typography className={classes.listItem}>
                       {persona.name +
                         " - " +
                         persona.firstName +

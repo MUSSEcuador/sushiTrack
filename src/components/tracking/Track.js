@@ -270,6 +270,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+
 function Track(props) {
   //import classes
   const classes = useStyles();
@@ -428,6 +429,7 @@ function Track(props) {
   if (loading) return <Loading />;
   if (error) return <Error error={error} />;
   if (data) {
+
     if (data.getSystemStats) {
       if (isInitializeValues) {
         if (data.getSystemStats.deliveriesWithActiveRoutes.length > 0) {

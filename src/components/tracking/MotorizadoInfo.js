@@ -103,9 +103,10 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: "1vw",
   },
   modal: {
-    marginLeft: "15vw",
+    marginLeft: "10vw",
     marginTop: "15vh",
-    marginRight: "15vw",
+    marginRight: "20vw",
+    
   },
 }));
 
@@ -307,7 +308,7 @@ function MotorizadoInfo(props) {
           </Grid>
         </Grid>
       </Box>
-      <Modal open={openInfo} onClose={closeModal} className={classes.modal}>
+      <Modal open={openInfo} onClose={closeModal} className={classes.modal} disableAutoFocus={true}>
         <div>
           <OrderInfo order={order} />
         </div>
