@@ -39,7 +39,7 @@ const CANCEL_CALL = gql`
 const useStyles = makeStyles((theme) => ({
   withRoute: {
     margin: "0.5vh 0vw ",
-    width: "100%",
+    width: "99%",
     boxShadow: "2px 2px 5px rgb(100,100,100)",
     backgroundColor: theme.palette.primary.light,
     [theme.breakpoints.down("sm")]: {
@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
   },
   withoutRoute: {
     margin: "0.5vh 0vw",
-    width: "100%",
+    width: "99%",
     boxShadow: "2px 2px 5px rgb(100,100,100)",
     backgroundColor: theme.palette.error.light,
     [theme.breakpoints.down("sm")]: {
@@ -62,10 +62,11 @@ const useStyles = makeStyles((theme) => ({
     right: "4px",
     top: "1px",
     width: "30%",
-    fontWeight: 500,
+    fontWeight: 200,
     fontSize: "9px",
     color: theme.palette.secondary.dark,
-    padding: "0 0",
+    lineHeight: "initial",
+    padding: "0.5vh 0 0 0",
     boxShadow: "2px 2px 3px rgb(100,100,100)",
   },
   called: {
@@ -120,9 +121,15 @@ function MotorizadoInfo(props) {
 
   const getLastUpdate = () => {
     if (order.lastUpdate) {
+      if (order.lastUpdate.toString() === "0001-01-01T00:00:00")
+      {
+        return("no registra")
+      }
       let toTime = moment(order.lastUpdate).toLocaleString();
+      
       toTime = toTime.split("G");
       toTime = toTime[0];
+      
       return toTime;
     }
   };
@@ -221,7 +228,7 @@ function MotorizadoInfo(props) {
           {" " + order.firstName + " " + order.lastName}
         </Typography>
         <Typography align="left" className={classes.vehData}>
-          <b>Ultima actualización: </b>
+          <b>Última actualización: </b>
           {getLastUpdate()}
         </Typography>
         {order.currentRoute ? (
@@ -241,7 +248,7 @@ function MotorizadoInfo(props) {
         ) : null}
 
         <Typography align="justify" className={classes.vehData}>
-          <b>Ordenes en espera: </b>
+          <b>Órdenes en espera: </b>
           {" " + order.ordersAssigned.length}
         </Typography>
         <Grid container spacing={4} className={classes.iconsList}>

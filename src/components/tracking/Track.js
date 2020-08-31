@@ -364,6 +364,16 @@ function Track(props) {
     setLatitud(order.lastPosition.latitude);
     setLongitud(order.lastPosition.longitude);
   };
+  const recenterLocal = (order) => {
+    if (mapZoom === 16) {
+      setMapZoom(15);
+    } else {
+      setMapZoom(16);
+    }
+    setShowRoute(false);
+    setLatitud(order.location.latitude);
+    setLongitud(order.location.longitude);
+  };
   const showOffice = (position) => {
     if (mapZoom === 16) {
       setMapZoom(15);
@@ -583,7 +593,7 @@ function Track(props) {
                         <LocalInfo
                           order={order}
                           key={index}
-                          recenter={recenter}
+                          recenter={recenterLocal}
                           destinoCenter={destinoCenter}
                           showOrderRoute={showOrderRoute}
                           motorizados={data.getSystemStats.deliveries}

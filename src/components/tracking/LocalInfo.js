@@ -12,6 +12,7 @@ import {
 } from "@material-ui/core";
 
 import InputAdornment from "@material-ui/core/InputAdornment";
+import LocationOnIcon from "@material-ui/icons/LocationOn";
 import AddIcCallIcon from "@material-ui/icons/AddIcCall";
 
 import CallMotorizado from "./CallMotorizado";
@@ -42,11 +43,12 @@ const useStyles = makeStyles((theme) => ({
     right: "4px",
     top: "1px",
     width: "30%",
-    fontWeight: 100,
+    fontWeight: 200,
     fontSize: "9px",
+    lineHeight: "initial",
     color: theme.palette.secondary.dark,
     padding: "0.5vh 0 0 0",
-    boxShadow: "2px 2px 5px rgb(100,100,100)",
+    boxShadow: "2px 2px 3px rgb(100,100,100)",
   },
   vehTitle: {
     fontSize: 16,
@@ -79,12 +81,16 @@ const useStyles = makeStyles((theme) => ({
 function LocalInfo(props) {
   const classes = useStyles();
 
-  const { order, motorizados } = props;
+  const { order, motorizados, recenter } = props;
 
   const [openInfo, setOpenInfo] = React.useState(false);
 
   const getLastUpdate = () => {
     if (order.lastUpdate) {
+      if (order.lastUpdate.toString() === "0001-01-01T00:00:00")
+      {
+        return("no registra")
+      }
       let toTime = moment(order.lastUpdate).toLocaleString();
       toTime = toTime.split("G");
       toTime = toTime[0];
@@ -135,7 +141,7 @@ function LocalInfo(props) {
 
         <Typography className={classes.vehTitle}> {order.code}</Typography>
         <Typography align="left" className={classes.vehData}>
-          <b>Local: </b>
+          <b>Nombre del Local: </b>
           {" " + order.name}
         </Typography>
         {order.address ? (
@@ -147,7 +153,7 @@ function LocalInfo(props) {
           </div>
         ) : null}
         <Typography align="left" className={classes.vehData}>
-          <b>Ultima actualización: </b>
+          <b>Última actualización: </b>
           {getLastUpdate()}
         </Typography>
         <Grid container spacing={4} className={classes.iconsList}>
@@ -165,6 +171,21 @@ function LocalInfo(props) {
                   }}
                 >
                   <AddIcCallIcon />
+                </IconButton>
+              </InputAdornment>
+            </Tooltip>
+          </Grid>
+          <Grid item xs={1}>
+            <Tooltip title="Ubicación Local" enterDelay={600} leaveDelay={150}>
+              <InputAdornment position="start">
+                <IconButton
+                  className={classes.activo}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    recenter(order);
+                  }}
+                >
+                  <LocationOnIcon />
                 </IconButton>
               </InputAdornment>
             </Tooltip>
