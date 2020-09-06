@@ -122,7 +122,11 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   button: {
-    width: "90%",
+    width: "80%",
+    [theme.breakpoints.up("md")]: {
+        height: "100%",
+        fontSize: "1.4em"
+      },
     backgroundColor: theme.palette.secondary.main,
     color: theme.palette.primary.main,
   },
@@ -132,10 +136,17 @@ const useStyles = makeStyles((theme) => ({
   },
   titleResumen: {
     color: theme.palette.secondary.main,
+    [theme.breakpoints.up("md")]: {
+        height: "100%",
+        fontSize: "1.4em"
+      },
+  },
+  clienteData: {
+    color: theme.palette.primary.contrastText,
   },
   resumenContainer: {
     margin: "3vh 8vw",
-    paddingBottom: "2vh"
+    paddingBottom: "2vh",
   },
   ordersContainer: {
     minHeight: "20vh",
@@ -183,7 +194,6 @@ function Reportes() {
 
   console.log(dataFromDetail);
 
-
   const [deliveryQuery, setDeliveryQuery] = React.useState({
     StartDate: initDate,
     EndDate: endDate,
@@ -223,13 +233,11 @@ function Reportes() {
   }, [transact]);
 
   useEffect(() => {
-
     if (routeHistory.data?.getRouteHistory) {
       setDFJ(routeHistory.data.getRouteHistory);
     } else setDFJ(null);
-    if (routeHistory.data?.getOrderDetail)
-    {
-        setDFD(routeHistory.data.getOrderDetail.orderAssigned)
+    if (routeHistory.data?.getOrderDetail) {
+      setDFD(routeHistory.data.getOrderDetail.orderAssigned);
     }
   }, [routeHistory.data]);
 
@@ -261,8 +269,6 @@ function Reportes() {
       setFilteredOrders(allOrders);
     }
   };
-
- 
 
   const buscar = (e) => {
     const newQuery = {
@@ -306,19 +312,47 @@ function Reportes() {
     }
   };
 
+  const getDireccion = () => {
+    let dir = "";
+    if (dataFromDetail.order.clientAddress.principalStreet) {
+      dir = dir + dataFromDetail.order.clientAddress.principalStreet + " ";
+    }
+    if (dataFromDetail.order.clientAddress.number) {
+      dir = dir + dataFromDetail.order.clientAddress.number + " ";
+    }
+    if (dataFromDetail.order.clientAddress.secondaryStreet) {
+      if (dataFromDetail.order.clientAddress.number) {
+        dir = dir + dataFromDetail.order.clientAddress.secondaryStreet;
+      } else
+        dir = dir + " y " + dataFromDetail.order.clientAddress.secondaryStreet;
+    }
+    return dir;
+  };
+
   const getGraphic = () => {
     let doc = new jsPDF();
+    let img = new Image();
+    img.src = 'img/logo.png'
+    doc.rect(0, 0, 210, 30, "F");
+    doc.addImage(img, "PNG", 10, 9, 50, 12);
     doc.setTextColor("red");
     doc.setFontSize(16);
     doc.text("RESUMEN DE ORDEN", 100, 20, "center");
     doc.setTextColor("black");
     doc.setFontSize(12);
-    let orden = "Orden #" + transact;
-    doc.text(orden, 10, 20);
-
+    let orden = "Número de orden: " + transact;
+    doc.text(orden, 20, 40);
+    const client =
+      "Cliente: " +
+      dataFromDetail.order.client.name +
+      " " +
+      dataFromDetail.order.client.lastname;
+    doc.text(client, 20, 50);
+    const directions = "Dirección: " + getDireccion();
+    doc.text(directions, 20, 60);
     if (dataToShowRoute) {
       let url = `
-                https://maps.googleapis.com/maps/api/staticmap?zoom=16&size=512x512&maptype=roadmap&markers=size:tiny|color:red|`;
+                https://maps.googleapis.com/maps/api/staticmap?&size=512x512&maptype=roadmap&markers=size:tiny|color:red|`;
       dataToShowRoute.forEach((data) => {
         url = url + "|" + data.lat + "," + data.lng;
       });
@@ -328,10 +362,26 @@ function Reportes() {
         url = url + "|" + data.lat + "," + data.lng;
       });
       url = url + "&key=AIzaSyDGA3CpMqhCRFj6RPuQkfkHnw9l0sGTUx4";
-      console.log(url);
       let imgData = url;
-      doc.addImage(imgData, "JPEG", 15, 40, 180, 180);
+      doc.addImage(imgData, "JPEG", 20, 70, 170, 180);
     }
+    doc.addPage();
+    doc.rect(0, 0, 210, 30, "F");
+    doc.addImage(img, "PNG", 10, 9, 50, 12);
+    doc.setTextColor("red");
+    doc.setFontSize(16);
+    doc.text("PEDIDO", 100, 20, "center");
+    doc.setTextColor("black");
+    doc.setFontSize(12);
+    
+    const items = dataFromDetail.order?.items.map((el) => {
+      return [el.description, el.quantity];
+    });
+    doc.autoTable({
+      margin: { top: 40 },
+      head: [["DESCRIPCION", "CANTIDAD"]],
+      body: items,
+    });
 
     const data = dataFromJournal.journal.map((el) => {
       let auxDate = moment(el.date);
@@ -339,9 +389,16 @@ function Reportes() {
       return [estados[el.eventName], el.deliveryId, auxDate, el.description];
     });
     doc.addPage();
-    doc.text("RUTA RECORRIDA", 100, 10, "center");
+    doc.rect(0, 0, 210, 30, "F");
+    doc.addImage(img, "PNG", 10, 9, 50, 12);
+    doc.setTextColor("red");
+    doc.setFontSize(16);
+    doc.text("RUTA RECORRIDA", 100, 20, "center");
+    doc.setTextColor("black");
+    doc.setFontSize(12);
+    
     doc.autoTable({
-      margin: { top: 20 },
+      margin: { top: 40 },
       head: [["ESTADO", "DELIVERY", "FECHA Y HORA", "DESCRIPCION"]],
       body: data,
     });
@@ -353,7 +410,7 @@ function Reportes() {
     <div className={classes.root}>
       <Header isReport={true} />
       <Grid container spacing={2}>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={3}>
           <TextField
             id="initialDate"
             value={initialDate}
@@ -381,7 +438,7 @@ function Reportes() {
             }}
           />
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={3}>
           <TextField
             id="finalDate"
             value={finalDate}
@@ -432,6 +489,14 @@ function Reportes() {
                 setShowMap(false);
                 setShowMap(false);
               }}
+              InputLabelProps={{
+                shrink: true,
+                style: {
+                  color: "red",
+                  fontWeight: 900,
+                  paddingLeft: "1vw",
+                },
+              }}
               SelectProps={{
                 native: true,
               }}
@@ -448,7 +513,7 @@ function Reportes() {
           ) : null}
         </Grid>
 
-        <Grid item xs={12} md={1}>
+        <Grid item xs={12} md={3}>
           <Button
             className={classes.button}
             variant="contained"
@@ -512,13 +577,57 @@ function Reportes() {
                 {dataFromJournal.journal[0].tripId}
               </Typography>
             ) : null}
-            {dataFromDetail.order?
-            <Typography className={classes.titleResumen} align="center">
-            {dataFromDetail.order.client.name + " " + dataFromDetail.order.client.lastname}
-          </Typography>
-            :null}
-
+            {dataFromDetail.order?.client.name ? (
+              <Typography className={classes.clienteData} align="justify">
+                {"Cliente: " +
+                  dataFromDetail.order.client.name +
+                  " " +
+                  dataFromDetail.order.client.lastname}
+              </Typography>
+            ) : null}
+            {dataFromDetail.order?.clientAddress.principalStreet ? (
+              <Typography className={classes.clienteData} align="justify">
+                {"Dirección: " + getDireccion()}
+              </Typography>
+            ) : null}
+            {dataFromDetail.order?.items ? (
+              <div>
+                <Typography> DETALLES DE LA ORDEN</Typography>
+                <List>
+                  <ListItem>
+                    <Grid container>
+                      <Grid item xs={6}>
+                        <b>DESCRIPCION</b>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <b>CANTIDAD</b>
+                      </Grid>
+                    </Grid>
+                  </ListItem>
+                  {dataFromDetail.order.items.map((el, index) => {
+                    let auxDate = moment(el.date);
+                    auxDate = auxDate.toLocaleString();
+                    return (
+                      <React.Fragment key={index}>
+                        <Divider />
+                        <ListItem>
+                          <Grid container>
+                            <Grid item xs={6}>
+                              {el.description}
+                            </Grid>
+                            <Grid item xs={6}>
+                              {el.quantity}
+                            </Grid>
+                          </Grid>
+                        </ListItem>
+                      </React.Fragment>
+                    );
+                  })}
+                </List>
+              </div>
+            ) : null}
           </div>
+          <Typography> DETALLES DE LA ENTREGA</Typography>
           <List>
             <ListItem>
               <Grid container>
