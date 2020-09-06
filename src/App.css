@@ -21,7 +21,7 @@
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: #ffffff;
 }
 
 .App-link {
@@ -29,7 +29,11 @@
 }
 
 
+.MuiBadge-badge {
+  background-color: red;
+  color: rgb(255, 255, 255);
 
+}
 /* .MuiMenu-list{
 
   background-color: rgba(0,0,0)

@@ -12,6 +12,8 @@ import PrivateRoute from "./components/common/PrivateRoute";
 import "./App.css";
 import Login from "./components/main/Login";
 import Track from "./components/tracking/Track";
+import Reportes from "./components/reports/Reportes";
+
 
 function App(props) {
   return (
@@ -24,6 +26,9 @@ function App(props) {
             <Route exact path="/login" component={Login} />
             <Switch>
               <PrivateRoute exact path="/track" component={Track} />
+            </Switch>
+            <Switch>
+              <PrivateRoute exact path="/reportes" component={Reportes} />
             </Switch>
           </div>
         </Router>

@@ -198,7 +198,9 @@ function MapContainerF(props) {
                 elTrack.lastPosition.longitude
               }
               icon={{
-                url: "/img/blueIcon.png",
+                url: "/img/blackFish.png",
+                scaledSize: new google.maps.Size(50, 50)
+
               }}
               position={{
                 lat: elTrack.lastPosition.latitude,
@@ -233,6 +235,7 @@ function MapContainerF(props) {
 }
 
 export default GoogleApiWrapper({
-  apiKey: "AIzaSyDGA3CpMqhCRFj6RPuQkfkHnw9l0sGTUx4",
-  libraries: [],
+  //apiKey: "AIzaSyDGA3CpMqhCRFj6RPuQkfkHnw9l0sGTUx4",
+  apiKey: "AIzaSyDgsuPP6lq7UZnKlxnC5bTAKvRiQe-He74",
+  //libraries: [],
 })(MapContainerF);

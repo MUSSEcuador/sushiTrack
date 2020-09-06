@@ -10,7 +10,6 @@ import { Grid, TextField, IconButton, Button } from "@material-ui/core";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import SearchIcon from "@material-ui/icons/Search";
 
-import { GoogleApiWrapper } from "google-maps-react";
 
 import MapContainerF from "./MapContainerF";
 import Loading from "../common/Loading";
@@ -18,6 +17,7 @@ import Error from "../common/Error";
 import Header from "../common/Header";
 import MotorizadoInfo from "./MotorizadoInfo";
 import LocalInfo from "./LocalInfo";
+import SinAsignar from "./SinAsignar";
 
 const DATOS = gql`
   query GetSystemStats($token: String!) {
@@ -184,14 +184,38 @@ const STORES = gql`
     }
   }
 `;
+
+const ALERTS = gql`
+  query GetAlerts($queryAlert: QueryAlert, $token: String!) {
+    getAlerts(queryAlert: $queryAlert, token: $token) {
+      id
+      location {
+        latitude
+        longitude
+      }
+      address {
+        city
+      }
+      photo
+      isActive
+      eventName
+      solution
+      closedBy
+      closedDate
+      eventDescription
+      reportedBy
+    }
+  }
+`;
 const useStyles = makeStyles((theme) => ({
   root: {
+    position: "relative",
     paddingTop: "2vh",
     //height: "100vh",
     width: "100vw",
     backgroundColor: theme.palette.primary.dark,
     [theme.breakpoints.up("md")]: {
-      height: "100vh"
+      height: "100vh",
     },
   },
   controlPanel: {
@@ -268,8 +292,17 @@ const useStyles = makeStyles((theme) => ({
   infoWindowText: {
     color: "black",
   },
+  sinAsignar:{
+    position: "absolute",
+    right:'5px',
+    top: '10vh',
+    width: '20vw',
+    backgroundColor: theme.palette.secondary.main,
+    [theme.breakpoints.down("sm")]: {
+      width: "45vw",
+    },
+  }
 }));
-
 
 function Track(props) {
   //import classes
@@ -292,11 +325,6 @@ function Track(props) {
     pollInterval: 3000,
   });
 
-  const stores = useQuery(STORES, {
-    variables: { token },
-    pollInterval: 300000,
-  });
-
   const [delOrLoc, setDelOrLoc] = React.useState(true);
 
   const [filterM, setFilterM] = React.useState("");
@@ -307,7 +335,71 @@ function Track(props) {
   const [cities, setCities] = React.useState([]);
   const [localesByCity, setLocalesByCity] = React.useState([]);
   const [locales, setLocales] = React.useState([]);
+
+
+  const [startAlert] = React.useState(parseFloat(Date.now() -7*24*3600*1000));
+  // const [endAlert, setEndAlert] = React.useState(Date.now());
+  const [queryAlert, setQueryAlert] = React.useState(
+    {"startDate": startAlert,
+    "endDate": parseFloat(Date.now()),
+    "isActive": true,
+    "address": {
+      "city": cityFilter==="TODAS"?"":cityFilter
+      }
+    }
+    )
+  const stores = useQuery(STORES, {
+    variables: { token },
+    pollInterval: 300000,
+  });
+
+  const [alerts, setAlerts] = React.useState(null);
+
+  const alertsQuery = useQuery(ALERTS, {
+    variables:{
+      token,
+      queryAlert}, 
+    pollInterval: 3000
+  })
+
   //FUNCTIONS
+  const changeCity = (newCity) =>{
+    setCityFilter(newCity);
+    let auxQuery = {
+    "startDate": startAlert,
+    "endDate": parseFloat(Date.now()),
+    "isActive": true,
+    "address": {
+      "city": newCity==="TODAS"?"":newCity
+      }
+    
+    };
+    setQueryAlert(auxQuery)
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      let auxQuery = {
+        "startDate": startAlert,
+        "endDate": parseFloat(Date.now()),
+        "isActive": true,
+        "address": {
+          "city": localStorage.citySelected==="TODAS"?"":localStorage.citySelected
+          }
+        
+        };
+        setQueryAlert(auxQuery)
+    }, 5000);
+
+    return () => clearInterval(interval);
+  },[])
+  useEffect(() => {
+    if(alertsQuery.data)
+    {
+      setAlerts(alertsQuery.data.getAlerts);
+    }
+   
+  }, [alertsQuery.data])    
 
   useEffect(() => {
     if (stores.data) {
@@ -317,6 +409,7 @@ function Track(props) {
         citiesTemp.add(store.address.city);
       }
       setCities(Array.from(citiesTemp));
+      localStorage.setItem("cities", Array.from(citiesTemp));
 
       if (cityFilter !== "TODAS") {
         localesTemp = localesTemp.filter((el) => {
@@ -439,7 +532,6 @@ function Track(props) {
   if (loading) return <Loading />;
   if (error) return <Error error={error} />;
   if (data) {
-
     if (data.getSystemStats) {
       if (isInitializeValues) {
         if (data.getSystemStats.deliveriesWithActiveRoutes.length > 0) {
@@ -486,9 +578,10 @@ function Track(props) {
       <div className={classes.root}>
         <Header
           history={props.history}
-          setCityFilter={setCityFilter}
+          changeCity={changeCity}
           cityFilter={cityFilter}
           cities={cities}
+          alerts={alerts && alerts.length>0?alerts:[]}
         />
         <Grid container>
           <Grid item xs={12} md={3} className={classes.controlPanel}>
@@ -564,44 +657,42 @@ function Track(props) {
             ) : (
               <div>
                 <div>
-
-              
-                <TextField
-                  size="small"
-                  fullWidth
-                  placeholder="Locales"
-                  className={classes.textField}
-                  value={filterL}
-                  onChange={(e) => {
-                    filterLocales(e.target.value, localesByCity);
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <IconButton>
-                          <SearchIcon color="primary" />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+                  <TextField
+                    size="small"
+                    fullWidth
+                    placeholder="Locales"
+                    className={classes.textField}
+                    value={filterL}
+                    onChange={(e) => {
+                      filterLocales(e.target.value, localesByCity);
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <IconButton>
+                            <SearchIcon color="primary" />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
                 </div>
-              <div className={classes.vehMap}>
-                {locales
-                  ? locales.map((order, index) => {
-                      return (
-                        <LocalInfo
-                          order={order}
-                          key={index}
-                          recenter={recenterLocal}
-                          destinoCenter={destinoCenter}
-                          showOrderRoute={showOrderRoute}
-                          motorizados={data.getSystemStats.deliveries}
-                        />
-                      );
-                    })
-                  : null}
-              </div>
+                <div className={classes.vehMap}>
+                  {locales
+                    ? locales.map((order, index) => {
+                        return (
+                          <LocalInfo
+                            order={order}
+                            key={index}
+                            recenter={recenterLocal}
+                            destinoCenter={destinoCenter}
+                            showOrderRoute={showOrderRoute}
+                            motorizados={data.getSystemStats.deliveries}
+                          />
+                        );
+                      })
+                    : null}
+                </div>
               </div>
             )}
           </Grid>
@@ -620,11 +711,14 @@ function Track(props) {
             />
           </Grid>
         </Grid>
+        {true?
+          <div className={classes.sinAsignar}>
+            <SinAsignar/>
+          </div>
+          :null}
       </div>
     );
   }
 }
 
-export default GoogleApiWrapper({
-  apiKey: "AIzaSyDGA3CpMqhCRFj6RPuQkfkHnw9l0sGTUx4",
-})(Track);
+export default Track;

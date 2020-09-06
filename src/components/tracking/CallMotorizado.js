@@ -175,7 +175,7 @@ function CallMotorizado(props) {
           size="small"
           fullWidth
           placeholder="Motorizado"
-          className={classes.textField}
+
           value={filter}
           onChange={(e) => {
             filterMotorizados(e);

@@ -11,9 +11,8 @@ import {
   TextField,
   Button,
   Snackbar,
-  Modal,
+  CircularProgress,
 } from "@material-ui/core";
-import Loading from "../common/Loading";
 
 const DATA_LOGIN = gql`
   mutation Login($username: String!, $password: String!) {
@@ -109,34 +108,27 @@ function Login(props) {
   const [userName, setUserName] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [openSnack, setOpenSnack] = React.useState(false);
-  const [openLoading, setOpenLoading] = React.useState(false);
-
-  //const {loading, error, data} = useMutation(DATA_LOGIN);
+  const [showLoading, setShowLoading] = React.useState(false);
 
   const [login] = useMutation(DATA_LOGIN);
 
-
-
   const submit = (e) => {
     e.preventDefault();
-    setOpenLoading(true);
+    setShowLoading(true)
     login({ variables: { username: userName, password: password } })
-      .then(result => {
-        setOpenLoading(false);
+      .then((result) => {
         if (result.data?.login?.token) {
-
-          sessionStorage.setItem('token',result.data.login.token);
+          setShowLoading(false)
+          sessionStorage.setItem("token", result.data.login.token);
           props.history.push("/track");
         } else {
           setOpenSnack(true);
+          setShowLoading(false)
           setUserName("");
           setPassword("");
         }
       })
-      .catch(err=>console.log(err));
-    
-    // props.history.push("/track");
-    // sessionStorage.setItem('token','123-123-123');
+      .catch((err) => console.log(err));
   };
 
   const handleClose = () => {
@@ -199,12 +191,16 @@ function Login(props) {
                 />
               </Grid>
             </Grid>
+
+            {showLoading ? <CircularProgress color="primary" /> : 
             <Button className={classes.button} variant="outlined" type="submit">
               INGRESAR
             </Button>
+}
           </form>
         </Grid>
       </Grid>
+
       <Snackbar
         open={openSnack}
         className={classes.snack}
@@ -213,9 +209,6 @@ function Login(props) {
       >
         <Typography>Su usuario y/o contraseña son incorrectos</Typography>
       </Snackbar>
-      <Modal openLoading={openLoading}>
-        <Loading></Loading>
-      </Modal>
     </div>
   );
 }
