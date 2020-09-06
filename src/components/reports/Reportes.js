@@ -4,7 +4,7 @@ import moment from "moment";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { gql } from "apollo-boost";
-import { useQuery, useLazyQuery } from "@apollo/react-hooks";
+import { useLazyQuery } from "@apollo/react-hooks";
 
 import Header from "../common/Header";
 import {
@@ -16,8 +16,6 @@ import {
   List,
   Divider,
   Typography,
-  Toolbar,
-  Tooltip,
 } from "@material-ui/core";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import SearchIcon from "@material-ui/icons/Search";
@@ -164,7 +162,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Reportes() {
+function Reportes(props) {
   const classes = useStyles();
   const [showMap, setShowMap] = React.useState(false);
   const [initialDate, setInitialDate] = React.useState(
@@ -408,7 +406,7 @@ function Reportes() {
 
   return (
     <div className={classes.root}>
-      <Header isReport={true} />
+      <Header isReport={true} history={props.history}/>
       <Grid container spacing={2}>
         <Grid item xs={12} md={3}>
           <TextField
