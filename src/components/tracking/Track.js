@@ -10,7 +10,6 @@ import { Grid, TextField, IconButton, Button } from "@material-ui/core";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import SearchIcon from "@material-ui/icons/Search";
 
-
 import MapContainerF from "./MapContainerF";
 import Loading from "../common/Loading";
 import Error from "../common/Error";
@@ -292,17 +291,38 @@ const useStyles = makeStyles((theme) => ({
   infoWindowText: {
     color: "black",
   },
-  sinAsignar:{
+  sinAsignar: {
     position: "absolute",
-    right:'5px',
-    top: '10vh',
-    width: '20vw',
+    right: "5px",
+    top: "10vh",
+    width: "20vw",
     backgroundColor: theme.palette.secondary.main,
     [theme.breakpoints.down("sm")]: {
       width: "45vw",
     },
-  }
+  },
 }));
+
+const NO_ATENDIDAS = gql`
+  query GetOrderWithProblems($deliveryQuery: DeliveryQuery, $token: String!) {
+    getDeliveryOrders(deliveryQuery: $deliveryQuery, token: $token) {
+      id
+      deliveryId
+      order {
+        transact
+        externalId
+        deliveryStatus
+        client {
+          name
+          lastname
+        }
+        clientAddress {
+          city
+        }
+      }
+    }
+  }
+`;
 
 function Track(props) {
   //import classes
@@ -336,70 +356,108 @@ function Track(props) {
   const [localesByCity, setLocalesByCity] = React.useState([]);
   const [locales, setLocales] = React.useState([]);
 
-
-  const [startAlert] = React.useState(parseFloat(Date.now() -7*24*3600*1000));
+  const [startAlert] = React.useState(
+    parseFloat(Date.now() - 7 * 24 * 3600 * 1000)
+  );
   // const [endAlert, setEndAlert] = React.useState(Date.now());
-  const [queryAlert, setQueryAlert] = React.useState(
-    {"startDate": startAlert,
-    "endDate": parseFloat(Date.now()),
-    "isActive": true,
-    "address": {
-      "city": cityFilter==="TODAS"?"":cityFilter
-      }
-    }
-    )
+  const [queryAlert, setQueryAlert] = React.useState({
+    startDate: startAlert,
+    endDate: parseFloat(Date.now()),
+    isActive: true,
+    address: {
+      city: cityFilter === "TODAS" ? "" : cityFilter,
+    },
+  });
+
+  const [deliveryQuery, setDeliveryQuery] = React.useState({
+    StartDate: startAlert,
+    EndDate: parseFloat(Date.now()),
+    City: cityFilter === "TODAS" ? "" : cityFilter,
+    OrderState: 0,
+  });
   const stores = useQuery(STORES, {
     variables: { token },
     pollInterval: 300000,
   });
 
   const [alerts, setAlerts] = React.useState(null);
+  const [ordersWithError, setOWE] = React.useState(null);
 
   const alertsQuery = useQuery(ALERTS, {
-    variables:{
+    variables: {
       token,
-      queryAlert}, 
-    pollInterval: 3000
-  })
+      queryAlert,
+    },
+    pollInterval: 3000,
+  });
+
+  const noAtendidasQuery = useQuery(NO_ATENDIDAS, {
+    variables: {
+      token,
+      deliveryQuery,
+    },
+    pollInterval: 3000,
+  });
+
+
 
   //FUNCTIONS
-  const changeCity = (newCity) =>{
+  const changeCity = (newCity) => {
     setCityFilter(newCity);
     let auxQuery = {
-    "startDate": startAlert,
-    "endDate": parseFloat(Date.now()),
-    "isActive": true,
-    "address": {
-      "city": newCity==="TODAS"?"":newCity
-      }
-    
+      startDate: startAlert,
+      endDate: parseFloat(Date.now()),
+      isActive: true,
+      address: {
+        city: newCity === "TODAS" ? "" : newCity,
+      },
     };
-    setQueryAlert(auxQuery)
-  }
+    setQueryAlert(auxQuery);
+    let auxnoAtendidasQuery = {
+      StartDate: startAlert,
+      EndDate: parseFloat(Date.now()),
+      City: newCity === "TODAS" ? "" : newCity,
+      OrderState: 0,
+    };
+    setDeliveryQuery(auxnoAtendidasQuery)
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
       let auxQuery = {
-        "startDate": startAlert,
-        "endDate": parseFloat(Date.now()),
-        "isActive": true,
-        "address": {
-          "city": localStorage.citySelected==="TODAS"?"":localStorage.citySelected
-          }
-        
-        };
-        setQueryAlert(auxQuery)
+        startDate: startAlert,
+        endDate: parseFloat(Date.now()),
+        isActive: true,
+        address: {
+          city:
+            localStorage.citySelected === "TODAS"
+              ? ""
+              : localStorage.citySelected,
+        },
+      };
+      setQueryAlert(auxQuery);
+      let auxnoAtendidasQuery = {
+        StartDate: startAlert,
+        EndDate: parseFloat(Date.now()),
+        City: localStorage.citySelected === "TODAS" ? "" : localStorage.citySelected,
+        OrderState: 0,
+      };
+      setDeliveryQuery(auxnoAtendidasQuery)
     }, 5000);
 
     return () => clearInterval(interval);
-  },[])
+  }, []);
   useEffect(() => {
-    if(alertsQuery.data)
-    {
+    if (alertsQuery.data) {
       setAlerts(alertsQuery.data.getAlerts);
     }
-   
-  }, [alertsQuery.data])    
+  }, [alertsQuery.data]);
+
+  useEffect(() => {
+    if (noAtendidasQuery.data) {
+      setOWE(noAtendidasQuery.data.getDeliveryOrders);
+    }
+  }, [noAtendidasQuery.data]);
 
   useEffect(() => {
     if (stores.data) {
@@ -581,7 +639,7 @@ function Track(props) {
           changeCity={changeCity}
           cityFilter={cityFilter}
           cities={cities}
-          alerts={alerts && alerts.length>0?alerts:[]}
+          alerts={alerts && alerts.length > 0 ? alerts : []}
         />
         <Grid container>
           <Grid item xs={12} md={3} className={classes.controlPanel}>
@@ -711,11 +769,11 @@ function Track(props) {
             />
           </Grid>
         </Grid>
-        {true?
+        {true ? (
           <div className={classes.sinAsignar}>
-            <SinAsignar/>
+            <SinAsignar  ordersWithError={ordersWithError}/>
           </div>
-          :null}
+        ) : null}
       </div>
     );
   }

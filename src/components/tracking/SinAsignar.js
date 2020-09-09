@@ -2,6 +2,8 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography, Divider } from "@material-ui/core";
 
+
+
 const useStyles = makeStyles((theme) => ({
   title: {
     padding: "1vh 0 0 0",
@@ -26,134 +28,12 @@ const useStyles = makeStyles((theme) => ({
     },
   },
 }));
-const getDeliveryOrders = [
-  {
-    id: "5f4b2ac4f57a95febd30fa50",
-    deliveryId: "cborbor",
-    order: {
-      transact: "test1-9097198",
-      externalId: 9097198,
-      deliveryStatus: 2,
-      client: {
-        name: "AMELIA",
-        lastname: "CASTELLANOS",
-      },
-      clientAddress: {
-        city: "QUITO",
-      },
-    },
-  },
-  {
-    id: "5f4b3009f57a95febd30fa52",
-    deliveryId: "cborbor",
-    order: {
-      transact: "test1-9097198",
-      externalId: 9097198,
-      deliveryStatus: 2,
-      client: {
-        name: "AMELIA",
-        lastname: "CASTELLANOS",
-      },
-      clientAddress: {
-        city: "QUITO",
-      },
-    },
-  },
-  {
-    id: "5f4b3010f57a95febd30fa54",
-    deliveryId: "cborbor",
-    order: {
-      transact: "test1-9097200",
-      externalId: 9097200,
-      deliveryStatus: 2,
-      client: {
-        name: "AMELIA",
-        lastname: "CASTELLANOS",
-      },
-      clientAddress: {
-        city: "QUITO",
-        sector: null,
-        principalStreet: "POMASQUI",
-        secondaryStreet: "",
-      },
-    },
-  },
-  {
-    id: "5f4b3013f57a95febd30fa56",
-    deliveryId: "cborbor",
-    order: {
-      transact: "test1-9097201",
-      externalId: 9097201,
-      deliveryStatus: 2,
-      client: {
-        name: "AMELIA",
-        lastname: "CASTELLANOS",
-      },
-      clientAddress: {
-        city: "GALAXY",
-        sector: null,
-        principalStreet: "POMASQUI",
-        secondaryStreet: "",
-      },
-    },
-  },
-  {
-    id: "5f4b3018f57a95febd30fa58",
-    deliveryId: "ccaizaguano",
-    order: {
-      transact: "test1-9097202",
-      externalId: 9097202,
-      deliveryStatus: 0,
-      client: {
-        name: "AMELIA",
-        lastname: "CASTELLANOS",
-      },
-      clientAddress: {
-        city: "QUITO",
-        sector: null,
-        principalStreet: "POMASQUI",
-        secondaryStreet: "",
-      },
-    },
-  },
-  {
-    id: "5f4b3018f57a95febd30fa5a",
-    deliveryId: "ccaizaguano",
-    order: {
-      transact: "test1-9097203",
-      externalId: 9097203,
-      deliveryStatus: 0,
-      client: {
-        name: "AMELIA",
-        lastname: "CASTELLANOS",
-      },
-      clientAddress: {
-        city: "Quito",
-        sector: null,
-        principalStreet: "POMASQUI",
-        secondaryStreet: "",
-      },
-    },
-  },
-  {
-    id: "5f4b3019f57a95febd30fa5c",
-    deliveryId: "ccaizaguano",
-    order: {
-      transact: "test1-9097204",
-      externalId: 9097204,
-      deliveryStatus: 0,
-      clientAddress: {
-        city: "Quito",
-        sector: null,
-        principalStreet: "POMASQUI",
-        secondaryStreet: "",
-      },
-    },
-  },
-];
 
-function SinAsignar() {
+
+function SinAsignar(props) {
   const classes = useStyles();
+
+  const {ordersWithError} = props;
 
   const getDireccion = (order) => {
     let dir = "";
@@ -173,9 +53,11 @@ function SinAsignar() {
 
   return (
     <div>
-        <Typography>ORDENES NO ATENDIDAS</Typography>
-      {getDeliveryOrders.map((order) => {
-          console.log(order)
+      {props.ordersWithError?.length >0?
+      <Typography>ORDENES NO ATENDIDAS</Typography>
+      :null}
+        
+      {props.ordersWithError.map((order) => {
         return (
           <div key={order.id}>
             <Typography className={classes.title} align="center">
