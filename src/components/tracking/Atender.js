@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button, TextField, Typography } from "@material-ui/core";
 import { gql } from "apollo-boost";

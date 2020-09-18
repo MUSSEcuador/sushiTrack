@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import moment from "moment";
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+
 import { gql } from "apollo-boost";
 import { useLazyQuery } from "@apollo/react-hooks";
 
@@ -276,14 +276,6 @@ function Reportes(props) {
     };
     e.preventDefault();
     setDeliveryQuery(newQuery);
-  };
-
-  const getShorten = (text, number) => {
-    let subs = text.substring(0, number);
-    if (text.length > number) {
-      subs = subs + "...";
-    }
-    return subs;
   };
 
   const prepareData = () => {
@@ -603,8 +595,8 @@ function Reportes(props) {
                     </Grid>
                   </ListItem>
                   {dataFromDetail.order.items.map((el, index) => {
-                    let auxDate = moment(el.date);
-                    auxDate = auxDate.toLocaleString();
+                    // let auxDate = moment(el.date);
+                    // auxDate = auxDate.toLocaleString();
                     return (
                       <React.Fragment key={index}>
                         <Divider />

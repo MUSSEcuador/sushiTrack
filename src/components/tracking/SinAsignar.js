@@ -33,7 +33,6 @@ const useStyles = makeStyles((theme) => ({
 function SinAsignar(props) {
   const classes = useStyles();
 
-  const {ordersWithError} = props;
 
   const getDireccion = (order) => {
     let dir = "";
@@ -57,7 +56,7 @@ function SinAsignar(props) {
       <Typography>ORDENES NO ATENDIDAS</Typography>
       :null}
         
-      {props.ordersWithError.map((order) => {
+      {props.ordersWithError?.map((order) => {
         return (
           <div key={order.id}>
             <Typography className={classes.title} align="center">
