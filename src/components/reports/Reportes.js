@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import moment from "moment";
 import jsPDF from "jspdf";
-
+import autoTable from "jspdf-autotable";
 import { gql } from "apollo-boost";
 import { useLazyQuery } from "@apollo/react-hooks";
 
