@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
   },
   subtitle: {
     padding: "0.5vh",
-    margin:"0 2vw",
+    margin: "0 2vw",
     color: theme.palette.secondary.contrastText,
     fontWeight: 100,
     fontSize: "1.2em",
@@ -69,7 +69,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function OrderInfo(props) {
-  const { order } = props;
+  const {
+    order,
+    setAuxMarkerToShow,
+    closeOrderInfo,
+    auxMarkerToShowCenter,
+  } = props;
   const classes = useStyles();
 
   const [openEspera, setOpenEspera] = React.useState(false);
@@ -90,7 +95,9 @@ function OrderInfo(props) {
     if (order.currentRoute.order.clientAddress.secondaryStreet) {
       if (order.currentRoute.order.clientAddress.number) {
         dir = dir + order.currentRoute.order.clientAddress.secondaryStreet;
-      } else dir = dir + " y " + order.currentRoute.order.clientAddress.secondaryStreet;
+      } else
+        dir =
+          dir + " y " + order.currentRoute.order.clientAddress.secondaryStreet;
     }
     return dir;
   };
@@ -103,7 +110,6 @@ function OrderInfo(props) {
     setOpenEspera(true);
   };
 
-
   return (
     <Paper className={classes.root}>
       <div className={classes.titleContainer}>
@@ -111,45 +117,51 @@ function OrderInfo(props) {
           {order.name}
         </Typography>
       </div>
-      {
-      order.currentRoute?
+      {order.currentRoute ? (
+        <div className={classes.contentContainer}>
+          <Typography className={classes.divisionText}>ORDEN ACTUAL</Typography>
+          {order.currentRoute.order.transact ? (
+            <Typography align="justify" className={classes.subtitle}>
+              <b>Identificador:</b> {" " + order.currentRoute.order.transact}
+            </Typography>
+          ) : null}
+          {order.currentRoute.order.client.name &&
+          order.currentRoute.order.client.lastname ? (
+            <Typography align="justify" className={classes.subtitle}>
+              <b>Cliente:</b>{" "}
+              {" " +
+                order.currentRoute.order.client.name +
+                " " +
+                order.currentRoute.order.client.lastname}
+            </Typography>
+          ) : null}
+          {order.currentRoute.order.clientAddress.sector ? (
+            <Typography align="justify" className={classes.subtitle}>
+              <b>Sector:</b>{" "}
+              {" " + order.currentRoute.order.clientAddress.sector}
+            </Typography>
+          ) : null}
+          {order.currentRoute.order.clientAddress.principalStreet ? (
+            <Typography align="justify" className={classes.subtitle}>
+              <b>Dirección:</b> {getDireccion()}
+            </Typography>
+          ) : null}
+          {order.currentRoute.order.clientAddress.cellphone ? (
+            <Typography align="justify" className={classes.subtitle}>
+              <b>Teléfono:</b>{" "}
+              {" " + order.currentRoute.order.clientAddress.cellphone}
+            </Typography>
+          ) : null}
+          {order.currentRoute.order.clientAddress.directions ? (
+            <Typography align="justify" className={classes.subtitle}>
+              <b>Referencia:</b>{" "}
+              {" " + order.currentRoute.order.clientAddress.directions}
+            </Typography>
+          ) : null}
+        </div>
+      ) : null}
       <div className={classes.contentContainer}>
-        <Typography className={classes.divisionText}>ORDEN ACTUAL</Typography>
-        {(order.currentRoute.order.transact)? (
-          <Typography align="justify" className={classes.subtitle}>
-            <b>Identificador:</b> {" " + order.currentRoute.order.transact}
-          </Typography>
-        ) : null}
-        {order.currentRoute.order.client.name && order.currentRoute.order.client.lastname ? (
-          <Typography align="justify" className={classes.subtitle}>
-            <b>Cliente:</b>{" "}
-            {" " + order.currentRoute.order.client.name + " " + order.currentRoute.order.client.lastname}
-          </Typography>
-        ) : null}
-        {order.currentRoute.order.clientAddress.sector ? (
-          <Typography align="justify" className={classes.subtitle}>
-            <b>Sector:</b> {" " + order.currentRoute.order.clientAddress.sector}
-          </Typography>
-        ) : null}
-        {order.currentRoute.order.clientAddress.principalStreet ? (
-          <Typography align="justify" className={classes.subtitle}>
-            <b>Dirección:</b> {getDireccion()}
-          </Typography>
-        ) : null}
-        {order.currentRoute.order.clientAddress.cellphone ? (
-          <Typography align="justify" className={classes.subtitle}>
-            <b>Teléfono:</b> {" " + order.currentRoute.order.clientAddress.cellphone}
-          </Typography>
-        ) : null}
-        {order.currentRoute.order.clientAddress.directions ? (
-          <Typography align="justify" className={classes.subtitle}>
-            <b>Referencia:</b> {" " + order.currentRoute.order.clientAddress.directions}
-          </Typography>
-        ) : null}
-      </div>
-      :null}
-      <div  className={classes.contentContainer}>
-      <Typography className={classes.divisionText}>
+        <Typography className={classes.divisionText}>
           {"ORDENES EN ESPERA (" + order.ordersAssigned.length + ")"}
         </Typography>
         <div className={classes.espera}>
@@ -180,7 +192,13 @@ function OrderInfo(props) {
       </div>
       <Modal open={openEspera} onClose={closeEspera} className={classes.modal}>
         <div>
-          <EsperaInfo ordersAssigned={esperaToShow} />
+          <EsperaInfo
+            ordersAssigned={esperaToShow}
+            setAuxMarkerToShow={setAuxMarkerToShow}
+            closeEspera={closeEspera}
+            closeOrderInfo={closeOrderInfo}
+            auxMarkerToShowCenter={auxMarkerToShowCenter}
+          />
         </div>
       </Modal>
     </Paper>

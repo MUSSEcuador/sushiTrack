@@ -7,15 +7,15 @@ const useStyles = makeStyles((theme) => ({
   root: {
     boxShadow: "3px 3px 25px rgb(0,0,0)",
     color: theme.palette.secondary.main,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     textAlign: "center",
   },
-  titleContainer:{
+  titleContainer: {
     backgroundColor: "black",
     height: "20%",
-    paddingTop: "1vh"
+    paddingTop: "1vh",
   },
-  contentContainer:{
+  contentContainer: {
     padding: "1vh 2vw",
   },
   title: {
@@ -33,41 +33,52 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function CustomInfoWindow(props) {
-    const {title, actual, espera, transact, recibe} = props
+  const { title, actual, espera, transact, recibe, eventName, eventDescription } = props;
 
-    const classes = useStyles();
-    return (
-        <div className={classes.root}>
-      <div className={classes.titleContainer}>
-      <Typography className={classes.title} align="center">
-      {"Delivery: "+title}
-      </Typography>
-      </div>
+  const classes = useStyles();
+  return (
+    <div className={classes.root}>
+      {title ? (
+        <div className={classes.titleContainer}>
+          <Typography className={classes.title} align="center">
+            {"Delivery: " + title}
+          </Typography>
+        </div>
+      ) : null}
       <div className={classes.contentContainer}>
-      
-      {actual ?(
-        <Typography align="justify" className={classes.subtitle}>
-          <b>Orden actual:</b> {" " + actual}
-        </Typography>
-      ) : null}
-      {espera ? (
-        <Typography align="justify" className={classes.subtitle}>
-          <b>Ordenes Espera:</b> {espera}
-        </Typography>
-      ) : null}
-      {transact ? (
-        <Typography align="justify" className={classes.subtitle}>
-          <b>Número de orden:</b> {transact}
-        </Typography>
-      ) : null}
-      {recibe ? (
-        <Typography align="justify" className={classes.subtitle}>
-          <b>Cliente:</b> {recibe}
-        </Typography>
-      ) : null}
+        {actual ? (
+          <Typography align="justify" className={classes.subtitle}>
+            <b>Orden actual:</b> {" " + actual}
+          </Typography>
+        ) : null}
+        {espera ? (
+          <Typography align="justify" className={classes.subtitle}>
+            <b>Ordenes Espera:</b> {espera}
+          </Typography>
+        ) : null}
+        {transact ? (
+          <Typography align="justify" className={classes.subtitle}>
+            <b>Número de orden:</b> {transact}
+          </Typography>
+        ) : null}
+        {recibe ? (
+          <Typography align="justify" className={classes.subtitle}>
+            <b>Cliente:</b> {recibe}
+          </Typography>
+        ) : null}
+        {eventName ? (
+          <Typography align="justify" className={classes.subtitle}>
+            <b>Alerta:</b> {eventName}
+          </Typography>
+        ) : null}
+        {eventDescription ? (
+          <Typography align="justify" className={classes.subtitle}>
+            <b>Detalle:</b> {eventDescription}
+          </Typography>
+        ) : null}
       </div>
     </div>
-    )
+  );
 }
 
-export default CustomInfoWindow
+export default CustomInfoWindow;

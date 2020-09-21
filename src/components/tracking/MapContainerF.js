@@ -76,6 +76,22 @@ function MapContainerF(props) {
     }
   }, [props.showRoute]);
 
+  useEffect(() => {
+    if(props.latitude){
+      if(mapInstance){
+        mapInstance.setCenter({lat:props.latitud, lng:props.longitud});
+      }
+    }
+  }, [props.latitud])
+
+  useEffect(() => {
+    if(props.longitud){
+      if(mapInstance){
+        mapInstance.setCenter({lat:props.latitud, lng:props.longitud});
+      }
+    }
+  }, [props.longitud])
+
   const calculateAndDisplayRoute = (map, data) => {
     const directionsService = new google.maps.DirectionsService();
     let directionsDisplay = displayServiceInstance;
@@ -116,11 +132,20 @@ function MapContainerF(props) {
   };
 
   const onMapClick = (props) => {
+
+    //console.log(mapInstance);
+    //mapInstance.setCenter({lat:-0.179663, lng:-78.4945227});
+
     if (props.showingInfoWindow) {
       props.setshowingInfoWindow(false);
       // setactiveMarker(null);
     }
   };
+
+  let auxMarkerToShow = props.auxMarkerToShow? props.auxMarkerToShow.slice():[];
+  auxMarkerToShow = auxMarkerToShow.filter(
+    (el) => el.latitude !== 0 && el.longitude !== 0
+  );
 
   let lastUpdates = props.transformed ? props.transformed.slice() : [];
   lastUpdates = lastUpdates.filter(
@@ -142,7 +167,7 @@ function MapContainerF(props) {
         mapTypeControl={false}
         zoom={props.mapZoom}
         initialCenter={{ lat: props.latitud, lng: props.longitud }}
-        center={{ lat: props.latitud, lng: props.longitud }}
+        //center={{ lat: props.latitud, lng: props.longitud }}
         onReady={handleMapReady}
         onClick={(props, marker, event) => {
           onMapClick(props);
@@ -188,7 +213,11 @@ function MapContainerF(props) {
                 props.setshowingInfoWindow(true);
               }}
               title={elTrack.name}
-              actual={elTrack.hasActiveDeliveries?elTrack.currentRoute.order.transact:null}
+              actual={
+                elTrack.hasActiveDeliveries
+                  ? elTrack.currentRoute.order.transact
+                  : null
+              }
               espera={elTrack.ordersAssigned.length}
               status={0}
               location={
@@ -199,12 +228,38 @@ function MapContainerF(props) {
               }
               icon={{
                 url: "/img/blackFish.png",
-                scaledSize: new google.maps.Size(50, 50)
-
+                scaledSize: new google.maps.Size(50, 50),
               }}
               position={{
                 lat: elTrack.lastPosition.latitude,
                 lng: elTrack.lastPosition.longitude,
+              }}
+            />
+          );
+        })}
+        {auxMarkerToShow.map((elTrack, index) => {
+          // ADDITIONAL MARKERS TO SHOW
+          return (
+            <Marker
+              key={index}
+              onClick={(prop, marker, e) => {
+                props.callSetActiveMarker(marker);
+                props.setshowingInfoWindow(true);
+              }}
+              title={elTrack.reportedBy?elTrack.reportedBy:null}
+              recibe={elTrack.client?elTrack.client.name + " " + elTrack.client.lastname + ", en espera":null}
+              eventDescription={elTrack.eventDescription?elTrack.eventDescription:null}
+              eventName={elTrack.eventName?elTrack.eventName:null}
+              status={2}
+              location={
+                "Lat: " +
+                elTrack.latitude +
+                " Long: " +
+                elTrack.longitude
+              }
+              position={{
+                lat: elTrack.latitude,
+                lng: elTrack.longitude,
               }}
             />
           );
@@ -225,6 +280,8 @@ function MapContainerF(props) {
                 title={props.activeMarker.title}
                 recibe={props.activeMarker.recibe}
                 transact={props.activeMarker.transact}
+                eventName={props.activeMarker.eventName}
+                eventDescription={props.activeMarker.eventDescription}
               />
             )}
           </div>

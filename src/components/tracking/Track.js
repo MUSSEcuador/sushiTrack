@@ -347,6 +347,8 @@ function Track(props) {
 
   const [delOrLoc, setDelOrLoc] = React.useState(true);
 
+  const [auxMarkerToShow, setAuxMarkerToShow] = React.useState([]);
+
   const [filterM, setFilterM] = React.useState("");
   const [filterL, setFilterL] = React.useState("");
   const [cityFilter, setCityFilter] = React.useState(
@@ -399,8 +401,6 @@ function Track(props) {
     pollInterval: 3000,
   });
 
-
-
   //FUNCTIONS
   const changeCity = (newCity) => {
     setCityFilter(newCity);
@@ -419,7 +419,7 @@ function Track(props) {
       City: newCity === "TODAS" ? "" : newCity,
       OrderState: 0,
     };
-    setDeliveryQuery(auxnoAtendidasQuery)
+    setDeliveryQuery(auxnoAtendidasQuery);
   };
 
   useEffect(() => {
@@ -439,10 +439,13 @@ function Track(props) {
       let auxnoAtendidasQuery = {
         StartDate: startAlert,
         EndDate: parseFloat(Date.now()),
-        City: localStorage.citySelected === "TODAS" ? "" : localStorage.citySelected,
+        City:
+          localStorage.citySelected === "TODAS"
+            ? ""
+            : localStorage.citySelected,
         OrderState: 0,
       };
-      setDeliveryQuery(auxnoAtendidasQuery)
+      setDeliveryQuery(auxnoAtendidasQuery);
     }, 5000);
 
     return () => clearInterval(interval);
@@ -512,8 +515,8 @@ function Track(props) {
       setMapZoom(16);
     }
     setShowRoute(false);
-    setLatitud(order.lastPosition.latitude);
-    setLongitud(order.lastPosition.longitude);
+    setLatitud(order.lastPosition.latitude + Math.random()*0.00001);
+    setLongitud(order.lastPosition.longitude + Math.random()*0.00001);
   };
   const recenterLocal = (order) => {
     if (mapZoom === 16) {
@@ -522,8 +525,8 @@ function Track(props) {
       setMapZoom(16);
     }
     setShowRoute(false);
-    setLatitud(order.location.latitude);
-    setLongitud(order.location.longitude);
+    setLatitud(order.location.latitude + Math.random()*0.00001);
+    setLongitud(order.location.longitude + Math.random()*0.00001);
   };
   const showOffice = (position) => {
     if (mapZoom === 16) {
@@ -532,8 +535,8 @@ function Track(props) {
       setMapZoom(16);
     }
     setShowRoute(false);
-    setLatitud(position.latitude);
-    setLongitud(position.longitude);
+    setLatitud(position.latitude + Math.random()*0.00001);
+    setLongitud(position.longitude + Math.random()*0.00001);
   };
 
   const destinoCenter = (order) => {
@@ -543,9 +546,21 @@ function Track(props) {
       setMapZoom(16);
     }
     setShowRoute(false);
-    setLatitud(order.currentRoute.order.destination.latitude);
-    setLongitud(order.currentRoute.order.destination.longitude);
+    setLatitud(order.currentRoute.order.destination.latitude + Math.random()*0.00001);
+    setLongitud(order.currentRoute.order.destination.longitude + Math.random()*0.00001);
   };
+
+  const auxMarkerToShowCenter = (order)=>{
+    console.log(order)
+    if (mapZoom === 16) {
+      setMapZoom(15);
+    } else {
+      setMapZoom(16);
+    }
+    setShowRoute(false);
+    setLatitud(order.latitude + Math.random()*0.00001);
+    setLongitud(order.longitude + Math.random()*0.00001);
+  }
 
   const showOrderRoute = (order) => {
     const data = [
@@ -639,6 +654,8 @@ function Track(props) {
           changeCity={changeCity}
           cityFilter={cityFilter}
           cities={cities}
+          auxMarkerToShowCenter={auxMarkerToShowCenter}
+          setAuxMarkerToShow={setAuxMarkerToShow}
           alerts={alerts && alerts.length > 0 ? alerts : []}
         />
         <Grid container>
@@ -705,7 +722,9 @@ function Track(props) {
                             recenter={recenter}
                             showOffice={showOffice}
                             destinoCenter={destinoCenter}
+                            auxMarkerToShowCenter={auxMarkerToShowCenter}
                             showOrderRoute={showOrderRoute}
+                            setAuxMarkerToShow={setAuxMarkerToShow}
                           />
                         );
                       })
@@ -766,12 +785,13 @@ function Track(props) {
               callSetActiveMarker={callSetActiveMarker}
               setshowingInfoWindow={setshowingInfoWindow}
               showingInfoWindow={showingInfoWindow}
+              auxMarkerToShow={auxMarkerToShow}
             />
           </Grid>
         </Grid>
-        {ordersWithError? (
+        {ordersWithError ? (
           <div className={classes.sinAsignar}>
-            <SinAsignar  ordersWithError={ordersWithError}/>
+            <SinAsignar ordersWithError={ordersWithError} />
           </div>
         ) : null}
       </div>

@@ -1,7 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
+import { gql } from "apollo-boost";
+import { useLazyQuery } from "@apollo/react-hooks";
 
-import { Typography } from "@material-ui/core";
+import { Typography, Fab, Tooltip, Modal } from "@material-ui/core";
+import LinkIcon from "@material-ui/icons/Link";
+import RoomIcon from '@material-ui/icons/Room';
+
+import TrackURL from "./TrackURL";
+
+
+const GET_URL = gql`
+  query GetEncrypted($transact: String!, $token: String!) {
+    getEncryptedTransact(transact: $transact, token: $token)
+  }
+`;
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -11,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.secondary.main,
     backgroundColor: theme.palette.primary.light,
     textAlign: "center",
+    position: "relative",
   },
   titleContainer: {
     backgroundColor: theme.palette.primary.main,
@@ -19,6 +33,16 @@ const useStyles = makeStyles((theme) => ({
   },
   contentContainer: {
     padding: "1vh 2vw",
+  },
+  callURL: {
+    position: "absolute",
+    top: "18%",
+    right: 5,
+  },
+  showOnMap: {
+    position: "absolute",
+    top: "28%",
+    right: 5,
   },
   title: {
     padding: "2vh 0",
@@ -42,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 100,
     fontSize: "1.2em",
     [theme.breakpoints.down("sm")]: {
-      fontSize: "0.8em"
+      fontSize: "0.8em",
     },
   },
   items: {
@@ -53,7 +77,7 @@ const useStyles = makeStyles((theme) => ({
     overflow: "scroll",
     borderStyle: "solid",
     borderWidth: "1px",
-    borderColor: "lightgrey"
+    borderColor: "lightgrey",
   },
   itemsText: {
     padding: "0.5vh",
@@ -61,14 +85,74 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 100,
     fontSize: "1.1em",
     [theme.breakpoints.down("sm")]: {
-      fontSize: "0.8em"
+      fontSize: "0.8em",
     },
+  },
+  modal: {
+    marginLeft: "10vw",
+    marginTop: "15vh",
+    marginRight: "20vw",
   },
 }));
 
 function EsperaInfo(props) {
-  const { ordersAssigned } = props;
+  const { ordersAssigned, setAuxMarkerToShow, closeEspera, closeOrderInfo, auxMarkerToShowCenter } = props;
   const classes = useStyles();
+
+  const [transact, setTransact] = React.useState(null);
+  const [urlToShow, setURL] = React.useState(null);
+  const [openURL, setOpenURL] = React.useState(false);
+  const [sendOpenURL, setSendOpenURL] = React.useState(false);
+
+  const [getURL, url] = useLazyQuery(GET_URL, {
+    // variables: {
+    //   token: sessionStorage.token,
+    //   transact: transact,
+    // },
+  });
+
+  // useEffect(() => {
+  //   if (openURL) {
+  //     setTransact(ordersAssigned.order.transact);
+  //   }
+  // }, [openURL]);
+
+  useEffect(() => {
+    if (transact) {
+      getURL({variables: {
+        token: sessionStorage.token,
+        transact: transact,
+      }});
+    }
+  }, [transact]);
+
+  useEffect(() => {
+    if (url.data) {
+      setURL(url.data?.getEncryptedTransact);
+      setSendOpenURL(true);
+    }
+  }, [url]);
+
+  const closeURL = () => {
+    setOpenURL(false);
+    setSendOpenURL(false);
+    setTransact(null);
+    
+  };
+
+  const goToMap =()=>{
+    console.log(ordersAssigned.order)
+    const auxToMap = {
+      latitude : ordersAssigned.order.destination.latitude,
+      longitude : ordersAssigned.order.destination.longitude,
+      client: ordersAssigned.order.client
+    }
+    setAuxMarkerToShow([auxToMap]);
+    auxMarkerToShowCenter(auxToMap)
+    closeURL();
+    closeEspera();
+    closeOrderInfo()
+  }
 
   const getDireccion = () => {
     let dir = "";
@@ -89,6 +173,39 @@ function EsperaInfo(props) {
 
   return (
     <div className={classes.root}>
+      <Tooltip
+        className={classes.callURL}
+        title="Generar URL"
+        enterDelay={400}
+        leaveDelay={200}
+      >
+        <Fab
+          size="small"
+          onClick={(e) => {
+            e.preventDefault();
+            setTransact(ordersAssigned.order.transact);
+            //setOpenURL(true);
+          }}
+        >
+          <LinkIcon />
+        </Fab>
+      </Tooltip>
+      <Tooltip
+        className={classes.showOnMap}
+        title="Ir al mapa"
+        enterDelay={400}
+        leaveDelay={200}
+      >
+        <Fab
+          size="small"
+          onClick={(e) => {
+            e.preventDefault();
+            goToMap();
+          }}
+        >
+          <RoomIcon />
+        </Fab>
+      </Tooltip>
       <div className={classes.titleContainer}>
         <Typography className={classes.title} align="center">
           {"Orden #: " + ordersAssigned.order.tripId}
@@ -118,7 +235,7 @@ function EsperaInfo(props) {
             {" " + ordersAssigned.order.clientAddress.cellphone}
           </Typography>
         ) : null}
-        <Typography >
+        <Typography>
           <b>Orden</b>
         </Typography>
       </div>
@@ -134,6 +251,16 @@ function EsperaInfo(props) {
             })
           : null}
       </div>
+      <Modal
+        open={sendOpenURL}
+        onClose={closeURL}
+        className={classes.modal}
+        disableAutoFocus={true}
+      >
+        <div>
+          <TrackURL url={urlToShow} />
+        </div>
+      </Modal>
     </div>
   );
 }

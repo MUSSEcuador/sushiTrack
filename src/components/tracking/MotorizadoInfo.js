@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import { gql } from "apollo-boost";
-import { useMutation } from "@apollo/react-hooks";
+import { useMutation, useLazyQuery } from "@apollo/react-hooks";
 
 import moment from "moment";
 import {
@@ -21,8 +21,10 @@ import LocationOnIcon from "@material-ui/icons/LocationOn";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import CallEndIcon from "@material-ui/icons/CallEnd";
 import EmojiTransportationIcon from "@material-ui/icons/EmojiTransportation";
+import LinkIcon from "@material-ui/icons/Link";
 
 import OrderInfo from "./OrderInfo";
+import TrackURL from "./TrackURL";
 
 const CANCEL_CALL = gql`
   mutation StopCallDeliveryToOffice(
@@ -33,6 +35,12 @@ const CANCEL_CALL = gql`
       callDeliveryDetail: $callDeliveryDetail
       token: $token
     )
+  }
+`;
+
+const GET_URL = gql`
+  query GetEncrypted($transact: String!, $token: String!) {
+    getEncryptedTransact(transact: $transact, token: $token)
   }
 `;
 
@@ -107,29 +115,71 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "10vw",
     marginTop: "15vh",
     marginRight: "20vw",
-    
   },
 }));
 
 function MotorizadoInfo(props) {
   const classes = useStyles();
 
-  const { order, recenter, destinoCenter, showOrderRoute, showOffice } = props;
+  const {
+    order,
+    recenter,
+    destinoCenter,
+    auxMarkerToShowCenter,
+    showOrderRoute,
+    showOffice,
+    setAuxMarkerToShow,
+  } = props;
 
+  const [transact, setTransact] = React.useState(null);
+  const [urlToShow, setURL] = React.useState(null);
   const [openInfo, setOpenInfo] = React.useState(false);
+  const [openURL, setOpenURL] = React.useState(false);
+  const [sendOpenURL, setSendOpenURL] = React.useState(false);
   const [stopCallDeliveryToOffice] = useMutation(CANCEL_CALL);
+
+  const [getURL, url] = useLazyQuery(GET_URL, {
+    // variables: {
+    //   token: sessionStorage.token,
+    //   transact: transact,
+    // },
+  });
+
+  // useEffect(() => {
+  //   if (openURL) {
+  //     setTransact(order.currentRoute.order.transact);
+  //   }
+  // }, [openURL]);
+
+  useEffect(() => {
+    if (transact) {
+      getURL({
+        variables: {
+          token: sessionStorage.token,
+          transact: transact,
+        }
+      });
+    }
+  }, [transact]);
+
+  useEffect(() => {
+    if (url.data) {
+      setURL(url.data?.getEncryptedTransact);
+      setSendOpenURL(true);
+      console.log("open", url.data);
+    }
+  }, [url]);
 
   const getLastUpdate = () => {
     if (order.lastUpdate) {
-      if (order.lastUpdate.toString() === "0001-01-01T00:00:00")
-      {
-        return("no registra")
+      if (order.lastUpdate.toString() === "0001-01-01T00:00:00") {
+        return "no registra";
       }
       let toTime = moment(order.lastUpdate).toLocaleString();
-      
+
       toTime = toTime.split("G");
       toTime = toTime[0];
-      
+
       return toTime;
     }
   };
@@ -142,6 +192,12 @@ function MotorizadoInfo(props) {
 
   const closeModal = () => {
     setOpenInfo(false);
+  };
+
+  const closeURL = () => {
+    setOpenURL(false);
+    setSendOpenURL(false);
+    setTransact(null);
   };
 
   const onCancelCall = (param) => {
@@ -259,6 +315,7 @@ function MotorizadoInfo(props) {
                   className={classes.activo}
                   onClick={(e) => {
                     setOpenInfo(true);
+                    setAuxMarkerToShow([]);
                   }}
                 >
                   <AirportShuttleIcon />
@@ -274,6 +331,7 @@ function MotorizadoInfo(props) {
                   onClick={(e) => {
                     e.preventDefault();
                     showOrderRoute(order);
+                    setAuxMarkerToShow([]);
                   }}
                   disabled={!order.currentRoute?.order?.destination}
                 >
@@ -290,6 +348,7 @@ function MotorizadoInfo(props) {
                   onClick={(e) => {
                     e.preventDefault();
                     recenter(order);
+                    setAuxMarkerToShow([]);
                   }}
                 >
                   <LocationOnIcon />
@@ -313,11 +372,42 @@ function MotorizadoInfo(props) {
               </InputAdornment>
             </Tooltip>
           </Grid>
+          <Grid item xs={1}>
+            <Tooltip title="Generar URL" enterDelay={400} leaveDelay={200}>
+              <InputAdornment position="start">
+                <IconButton
+                  className={classes.activo}
+                  onClick={(e) => {
+                    //e.preventDefault();
+                    setTransact(order.currentRoute.order.transact);
+                    // setOpenURL(true);
+                  }}
+                >
+                  {<LinkIcon />}
+                </IconButton>
+              </InputAdornment>
+            </Tooltip>
+          </Grid>
         </Grid>
       </Box>
-      <Modal open={openInfo} onClose={closeModal} className={classes.modal} disableAutoFocus={true}>
+      <Modal
+        open={openInfo}
+        onClose={closeModal}
+        className={classes.modal}
+        disableAutoFocus={true}
+      >
         <div>
-          <OrderInfo order={order} />
+          <OrderInfo order={order} setAuxMarkerToShow={setAuxMarkerToShow} closeOrderInfo={closeModal} auxMarkerToShowCenter={auxMarkerToShowCenter} />
+        </div>
+      </Modal>
+      <Modal
+        open={sendOpenURL}
+        onClose={closeURL}
+        className={classes.modal}
+        disableAutoFocus={true}
+      >
+        <div>
+          <TrackURL url={urlToShow} />
         </div>
       </Modal>
     </div>

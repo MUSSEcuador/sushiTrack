@@ -79,7 +79,16 @@ const useStyles = makeStyles((theme) => ({
 function Header(props) {
   const classes = useStyles();
 
-  const { cityFilter, history, cities, changeCity, alerts, isReport } = props;
+  const {
+    cityFilter,
+    history,
+    cities,
+    changeCity,
+    alerts,
+    isReport,
+    setAuxMarkerToShow,
+    auxMarkerToShowCenter,
+  } = props;
 
   const [allAlerts, setAlerts] = React.useState(alerts ? alerts : []);
   const [alertsNumber, setAlertsNumber] = React.useState(
@@ -127,19 +136,19 @@ function Header(props) {
             aria-label="text primary button group"
             className={classes.buttonGroup}
           >
-            {!isReport?
-            <Button
-              className={
-                cityFilter === "TODAS" ? classes.buttonSelect : classes.button
-              }
-              onClick={() => {
-                localStorage.setItem("citySelected", "TODAS");
-                changeCity("TODAS");
-              }}
-            >
-              TODAS
-            </Button>
-            :null}
+            {!isReport ? (
+              <Button
+                className={
+                  cityFilter === "TODAS" ? classes.buttonSelect : classes.button
+                }
+                onClick={() => {
+                  localStorage.setItem("citySelected", "TODAS");
+                  changeCity("TODAS");
+                }}
+              >
+                TODAS
+              </Button>
+            ) : null}
             {cities?.map((el, index) => {
               return (
                 <Button
@@ -176,7 +185,12 @@ function Header(props) {
       </Grid>
       <Modal open={openAlert} onClose={closeModal} className={classes.modal}>
         <div>
-          <Alerts closeModal={closeModal} alerts={allAlerts} />
+          <Alerts
+            closeModal={closeModal}
+            alerts={allAlerts}
+            setAuxMarkerToShow={setAuxMarkerToShow}
+            auxMarkerToShowCenter={auxMarkerToShowCenter}
+          />
         </div>
       </Modal>
     </div>

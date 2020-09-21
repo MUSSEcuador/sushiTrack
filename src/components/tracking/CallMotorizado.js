@@ -74,6 +74,11 @@ const useStyles = makeStyles((theme) => ({
       fontSize: "0.8em"
     },
   },
+  textField: {
+    margin: "2vh 2vw 0 0", 
+    padding: "0 2vw",
+
+  },
   button: {
     position: "absolute",
     bottom: "2vh",
@@ -107,6 +112,7 @@ function CallMotorizado(props) {
   const [filteredMoto, setFilteredMoto] = React.useState(motorizados);
   const [filter, setFilter] = React.useState("");
   const [seleccionado, setSeleccionado] = React.useState(null);
+  const [reason, setReason] = React.useState("");
   const [openSnack, setOpenSnack] = React.useState(false);
   const [callDeliveryToOffice] = useMutation(CALL_DELIVERY);
 
@@ -129,6 +135,13 @@ function CallMotorizado(props) {
   };
 
   const onCall = () => {
+    let auxReason
+    if (reason===""){
+      auxReason = "Regrese al local"
+    }
+    else{
+      auxReason = reason
+    }
     const auxCallData = {
       deliveryId: seleccionado.name,
       officeAddress: {
@@ -139,6 +152,7 @@ function CallMotorizado(props) {
         latitude: local.location.latitude,
         longitude: local.location.longitude,
       },
+      reason: auxReason
     };
 
     callDeliveryToOffice({
@@ -243,6 +257,22 @@ function CallMotorizado(props) {
               " y " +
               local.address.secondaryStreet}
           </Typography>
+          <TextField
+          label="Ingrese el motivo de la llamada"
+          placeholder="Motivo"
+          fullWidth
+          value={reason}
+          className={classes.textField}
+          onChange={(e)=>{setReason(e.target.value)}}
+
+          InputLabelProps={{
+            shrink: true,
+            style: {
+              fontWeight: 500,
+              paddingLeft: "1vw",
+            },
+          }}
+          />
           <Button
             className={classes.button}
             disabled={!seleccionado}

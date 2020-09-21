@@ -190,7 +190,6 @@ function Reportes(props) {
   const initialCity = "";
   const iniTransact = "123";
 
-  console.log(dataFromDetail);
 
   const [deliveryQuery, setDeliveryQuery] = React.useState({
     StartDate: initDate,
@@ -214,7 +213,6 @@ function Reportes(props) {
     },
   });
   useEffect(() => {
-    setShowMap(true);
     setShowMap(true);
   }, [dataToShowRoute]);
 

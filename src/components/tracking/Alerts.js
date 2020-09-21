@@ -11,7 +11,11 @@ import {
   Button,
   CircularProgress,
   Modal,
+  IconButton,
+  Grid
 } from "@material-ui/core";
+
+import RoomIcon from "@material-ui/icons/Room";
 
 import Zoom from "./Zoom";
 import Atender from "./Atender";
@@ -89,8 +93,8 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 900,
     fontSize: "1.2em",
     [theme.breakpoints.down("sm")]: {
-        fontSize: "0.9em",
-      },
+      fontSize: "0.9em",
+    },
     "&:hover": {
       backgroundColor: theme.palette.primary.main,
       color: theme.palette.primary.contrastText,
@@ -153,7 +157,12 @@ const PICTURE = gql`
 `;
 
 function Alerts(props) {
-  const { alerts, closeModal } = props;
+  const {
+    alerts,
+    closeModal,
+    auxMarkerToShowCenter,
+    setAuxMarkerToShow,
+  } = props;
   const classes = useStyles();
   const [seleccionado, setSeleccionado] = React.useState(null);
   const [openZoom, setOpenZoom] = React.useState(false);
@@ -176,13 +185,6 @@ function Alerts(props) {
     closeModal();
   };
 
-  const getShorten = (text, number) => {
-    let subs = text.substring(0, number);
-    if (text.length > number) {
-      subs = subs + "...";
-    }
-    return subs;
-  };
 
   useEffect(() => {
     setAlertas(alerts);
@@ -197,6 +199,22 @@ function Alerts(props) {
       img.src = `data:image/jpeg;base64,${data.getPicture}`;
     }
   }, [data]);
+
+  const goToMap = (al) => {
+    console.log(al);
+    const auxToMap = {
+      latitude: al.location.latitude,
+      longitude: al.location.longitude,
+      eventDescription: al.eventDescription,
+      eventName: al.eventName,
+      reportedBy: al.reportedBy,
+    };
+    setAuxMarkerToShow([auxToMap]);
+    auxMarkerToShowCenter(auxToMap);
+    closeAtender();
+    // closeEspera();
+    // closeOrderInfo()
+  };
 
   return (
     <div className={classes.root}>
@@ -218,11 +236,26 @@ function Alerts(props) {
                       setSeleccionado(al);
                     }}
                   >
-                    <Typography className={classes.listItem}>
-                      {al.reportedBy +
-                        " " +
-                        getShorten(al.eventDescription, 20)}
-                    </Typography>
+                    <Grid container>
+                      <Grid item xs={11}>
+                        <Typography className={classes.listItem}>
+                          {al.reportedBy +
+                            " " +
+                            al.eventDescription}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={1}>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            goToMap(al);
+                          }}
+                        >
+                          <RoomIcon color="secondary" />
+                        </IconButton>
+                      </Grid>
+                    </Grid>
                   </ListItem>
                 </React.Fragment>
               );
