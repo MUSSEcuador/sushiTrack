@@ -122,9 +122,9 @@ const useStyles = makeStyles((theme) => ({
   button: {
     width: "80%",
     [theme.breakpoints.up("md")]: {
-        height: "100%",
-        fontSize: "1.4em"
-      },
+      height: "100%",
+      fontSize: "1.4em",
+    },
     backgroundColor: theme.palette.secondary.main,
     color: theme.palette.primary.main,
   },
@@ -135,9 +135,9 @@ const useStyles = makeStyles((theme) => ({
   titleResumen: {
     color: theme.palette.secondary.main,
     [theme.breakpoints.up("md")]: {
-        height: "100%",
-        fontSize: "1.4em"
-      },
+      height: "100%",
+      fontSize: "1.4em",
+    },
   },
   clienteData: {
     color: theme.palette.primary.contrastText,
@@ -190,7 +190,6 @@ function Reportes(props) {
   const initialCity = "";
   const iniTransact = "123";
 
-
   const [deliveryQuery, setDeliveryQuery] = React.useState({
     StartDate: initDate,
     EndDate: endDate,
@@ -227,6 +226,7 @@ function Reportes(props) {
       getRouteHistory();
     }
   }, [transact]);
+
 
   useEffect(() => {
     if (routeHistory.data?.getRouteHistory) {
@@ -265,6 +265,7 @@ function Reportes(props) {
       setFilteredOrders(allOrders);
     }
   };
+
 
   const buscar = (e) => {
     const newQuery = {
@@ -320,7 +321,7 @@ function Reportes(props) {
   const getGraphic = () => {
     let doc = new jsPDF();
     let img = new Image();
-    img.src = 'img/logo.png'
+    img.src = "img/logo.png";
     doc.rect(0, 0, 210, 30, "F");
     doc.addImage(img, "PNG", 10, 9, 50, 12);
     doc.setTextColor("red");
@@ -339,14 +340,26 @@ function Reportes(props) {
     const directions = "Dirección: " + getDireccion();
     doc.text(directions, 20, 60);
     if (dataToShowRoute) {
+      let route = dataToShowRoute;
+      if (route.length > 30){
+        let size= route.length;
+        const interval = Math.floor(size/27.0);
+        let auxPoints = [route[0]];
+        for (let index = 1; index < size; index+=interval) {
+         auxPoints.push(route[index]);
+        }
+  
+        auxPoints.push(route[size-1]);
+        route = auxPoints;
+      }
       let url = `
                 https://maps.googleapis.com/maps/api/staticmap?&size=512x512&maptype=roadmap&markers=size:tiny|color:red|`;
-      dataToShowRoute.forEach((data) => {
+                route.forEach((data) => {
         url = url + "|" + data.lat + "," + data.lng;
       });
 
       url = url + "&path=color:0x0000ff|weight:3";
-      dataToShowRoute.forEach((data) => {
+      route.forEach((data) => {
         url = url + "|" + data.lat + "," + data.lng;
       });
       url = url + "&key=AIzaSyDGA3CpMqhCRFj6RPuQkfkHnw9l0sGTUx4";
@@ -361,7 +374,7 @@ function Reportes(props) {
     doc.text("PEDIDO", 100, 20, "center");
     doc.setTextColor("black");
     doc.setFontSize(12);
-    
+
     const items = dataFromDetail.order?.items.map((el) => {
       return [el.description, el.quantity];
     });
@@ -384,7 +397,7 @@ function Reportes(props) {
     doc.text("RUTA RECORRIDA", 100, 20, "center");
     doc.setTextColor("black");
     doc.setFontSize(12);
-    
+
     doc.autoTable({
       margin: { top: 40 },
       head: [["ESTADO", "DELIVERY", "FECHA Y HORA", "DESCRIPCION"]],
@@ -396,7 +409,7 @@ function Reportes(props) {
 
   return (
     <div className={classes.root}>
-      <Header isReport={true} history={props.history}/>
+      <Header isReport={true} history={props.history} />
       <Grid container spacing={2}>
         <Grid item xs={12} md={3}>
           <TextField

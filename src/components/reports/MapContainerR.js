@@ -31,7 +31,6 @@ const useStyles = makeStyles((theme) => ({
 
 function MapContainerR(props) {
 
-  console.log(props.dataToShowRoute)
   const classes = useStyles();
 
   const [latitude, setLatitude] = useState(-0.176663);
@@ -85,12 +84,23 @@ function MapContainerR(props) {
       setDisplayServiceInstance(directionsDisplay);
     }
 
-    const waypoints = data.map((item) => {
+    let waypoints = data.map((item) => {
       return {
         location: { lat: item.lat, lng: item.lng },
         stopover: false,
       };
     });
+    if (waypoints.length > 15){
+      let size= waypoints.length;
+      const interval = Math.floor(size/13.0);
+      let auxPoints = [waypoints[0]];
+      for (let index = 1; index < size; index+=interval) {
+       auxPoints.push(waypoints[index]);
+      }
+
+      auxPoints.push(waypoints[size-1]);
+      waypoints = auxPoints;
+    }
     if (waypoints.length > 1) {
       const origin = waypoints.shift().location;
       const destination = waypoints.pop().location;
