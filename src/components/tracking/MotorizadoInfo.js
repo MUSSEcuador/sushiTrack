@@ -157,7 +157,7 @@ function MotorizadoInfo(props) {
         variables: {
           token: sessionStorage.token,
           transact: transact,
-        }
+        },
       });
     }
   }, [transact]);
@@ -372,22 +372,22 @@ function MotorizadoInfo(props) {
               </InputAdornment>
             </Tooltip>
           </Grid>
-          <Grid item xs={1}>
-            <Tooltip title="Generar URL" enterDelay={400} leaveDelay={200}>
-              <InputAdornment position="start">
-                <IconButton
-                  className={classes.activo}
-                  onClick={(e) => {
-                    //e.preventDefault();
-                    setTransact(order.currentRoute.order.transact);
-                    // setOpenURL(true);
-                  }}
-                >
-                  {<LinkIcon />}
-                </IconButton>
-              </InputAdornment>
-            </Tooltip>
-          </Grid>
+          {order.currentRoute? (
+            <Grid item xs={1}>
+              <Tooltip title="Generar URL" enterDelay={400} leaveDelay={200}>
+                <InputAdornment position="start">
+                  <IconButton
+                    className={classes.activo}
+                    onClick={(e) => {
+                      setTransact(order.currentRoute.order.transact);
+                    }}
+                  >
+                    {<LinkIcon />}
+                  </IconButton>
+                </InputAdornment>
+              </Tooltip>
+            </Grid>
+          ) : null}
         </Grid>
       </Box>
       <Modal
@@ -397,7 +397,12 @@ function MotorizadoInfo(props) {
         disableAutoFocus={true}
       >
         <div>
-          <OrderInfo order={order} setAuxMarkerToShow={setAuxMarkerToShow} closeOrderInfo={closeModal} auxMarkerToShowCenter={auxMarkerToShowCenter} />
+          <OrderInfo
+            order={order}
+            setAuxMarkerToShow={setAuxMarkerToShow}
+            closeOrderInfo={closeModal}
+            auxMarkerToShowCenter={auxMarkerToShowCenter}
+          />
         </div>
       </Modal>
       <Modal
