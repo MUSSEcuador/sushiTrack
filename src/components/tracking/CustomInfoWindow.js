@@ -33,15 +33,22 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function CustomInfoWindow(props) {
-  const { title, actual, espera, transact, recibe, eventName, eventDescription } = props;
+  const { title, local, actual, espera, transact, recibe, eventName, eventDescription } = props;
 
   const classes = useStyles();
   return (
     <div className={classes.root}>
-      {title ? (
+      {title && !local ? (
         <div className={classes.titleContainer}>
           <Typography className={classes.title} align="center">
             {"Delivery: " + title}
+          </Typography>
+        </div>
+      ) : null}
+      {local ? (
+        <div className={classes.titleContainer}>
+          <Typography className={classes.title} align="center">
+            {"Local: " + local}
           </Typography>
         </div>
       ) : null}

@@ -1,8 +1,10 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { Button, TextField, Typography } from "@material-ui/core";
+import { Button, TextField, Typography, IconButton } from "@material-ui/core";
 import { gql } from "apollo-boost";
 import { useMutation } from "@apollo/react-hooks";
+
+import CloseIcon from '@material-ui/icons/Close';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -15,6 +17,13 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.primary.main,
     height: "9%",
     paddingTop: "1vh",
+    position: "relative"
+  },
+  closeButton: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    color: theme.palette.secondary.light
   },
   contentContainer: {
     padding: "3vh 8vw",
@@ -88,6 +97,9 @@ function Atender(props) {
         <Typography className={classes.title} align="center">
           Atender la alerta: {seleccionado.eventName}
         </Typography>
+        <IconButton className={classes.closeButton} onClick={closeAtender}>
+          <CloseIcon/>
+        </IconButton>
       </div>
       <div className={classes.contentContainer}>
         <Typography>{seleccionado.eventDescription}</Typography>

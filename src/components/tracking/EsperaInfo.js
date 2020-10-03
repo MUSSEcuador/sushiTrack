@@ -3,9 +3,10 @@ import { makeStyles } from "@material-ui/core/styles";
 import { gql } from "apollo-boost";
 import { useLazyQuery } from "@apollo/react-hooks";
 
-import { Typography, Fab, Tooltip, Modal } from "@material-ui/core";
+import { Typography, Fab, Tooltip, Modal, IconButton } from "@material-ui/core";
 import LinkIcon from "@material-ui/icons/Link";
 import RoomIcon from '@material-ui/icons/Room';
+import CloseIcon from '@material-ui/icons/Close';
 
 import TrackURL from "./TrackURL";
 
@@ -30,6 +31,13 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.primary.main,
     height: "20%",
     paddingTop: "1vh",
+    position: "relative"
+  },
+  closeButton: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    color: theme.palette.secondary.light
   },
   contentContainer: {
     padding: "1vh 2vw",
@@ -210,6 +218,9 @@ function EsperaInfo(props) {
         <Typography className={classes.title} align="center">
           {"Orden #: " + ordersAssigned.order.tripId}
         </Typography>
+        <IconButton className={classes.closeButton} onClick={closeEspera}>
+          <CloseIcon/>
+        </IconButton>
       </div>
       <div className={classes.contentContainer}>
         <Typography align="justify" className={classes.subtitle}>
@@ -258,7 +269,7 @@ function EsperaInfo(props) {
         disableAutoFocus={true}
       >
         <div>
-          <TrackURL url={urlToShow} />
+          <TrackURL url={urlToShow} closeURL={closeURL}/>
         </div>
       </Modal>
     </div>

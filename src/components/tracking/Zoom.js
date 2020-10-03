@@ -1,22 +1,33 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles((theme) => ({
+import { IconButton } from "@material-ui/core";
 
-  imagenVertical:{
-    height: "100%"
+import CloseIcon from "@material-ui/icons/Close";
+
+const useStyles = makeStyles((theme) => ({
+  imagenVertical: {
+    height: "100%",
   },
   imagenHorizontal: {
-    width: "100%"
+    width: "100%",
   },
   imagenContainerV: {
-      maxHeight: "60vh",
-      height: "60vh"
+    maxHeight: "60vh",
+    height: "60vh",
+    position: "relative",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    color: theme.palette.secondary.light,
   },
   imagenContainerH: {
     maxWidth: "60vw",
-    width: "60vw"
-},
+    width: "60vw",
+    position: "relative",
+  },
 }));
 
 function Zoom(props) {
@@ -27,22 +38,28 @@ function Zoom(props) {
   //   `data:image/png;base64,${imagenToZoom}`
   // );
 
-
   return (
-
-        <div className={proporcion>0?classes.imagenContainerH:classes.imagenContainerV}>
+    <div
+      className={
+        proporcion > 0 ? classes.imagenContainerH : classes.imagenContainerV
+      }
+    >
+      <IconButton className={classes.closeButton} onClick={closeZoom}>
+        <CloseIcon />
+      </IconButton>
       {imagenToZoom ? (
         <img
           onClick={() => {
             closeZoom();
           }}
-          className={proporcion>0?classes.imagenHorizontal: classes.imagenVertical}
+          className={
+            proporcion > 0 ? classes.imagenHorizontal : classes.imagenVertical
+          }
           src={`data:image/jpeg;base64,${imagenToZoom}`}
           alt="noSeEncuentraImagen"
         />
       ) : null}
-      </div>
-
+    </div>
   );
 }
 

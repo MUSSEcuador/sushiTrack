@@ -152,6 +152,12 @@ function MapContainerF(props) {
     (el) => el.lastPosition.latitude !== 0 && el.lastPosition.longitude !== 0
   );
 
+  let allLocales = props.locales ? props.locales.slice() : [];
+  allLocales = allLocales.filter(
+    (el) => el.location.latitude !== 0 && el.location.longitude !== 0
+  );
+
+
   let destinations = props.transformed ? props.transformed.slice() : [];
   destinations = destinations
     .filter((el) => el.currentRoute !== null)
@@ -228,11 +234,40 @@ function MapContainerF(props) {
               }
               icon={{
                 url: "/img/blackFish.png",
-                scaledSize: new google.maps.Size(50, 50),
+                scaledSize: new google.maps.Size(30, 30),
               }}
               position={{
                 lat: elTrack.lastPosition.latitude,
                 lng: elTrack.lastPosition.longitude,
+              }}
+            />
+          );
+        })}
+        {allLocales.map((elTrack, index) => {
+          // LOCALES
+          return (
+            <Marker
+              key={index}
+              onClick={(prop, marker, e) => {
+                props.callSetActiveMarker(marker);
+                props.setshowingInfoWindow(true);
+              }}
+              title={elTrack.name?elTrack.name:null}
+              local={elTrack.name?elTrack.name:null}
+              status={2}
+              location={
+                "Lat: " +
+                elTrack.location.latitude +
+                " Long: " +
+                elTrack.location.longitude
+              }
+              icon={{
+                url: "/img/fish3.png",
+                scaledSize: new google.maps.Size(20, 20),
+              }}
+              position={{
+                lat: elTrack.location.latitude,
+                lng: elTrack.location.longitude,
               }}
             />
           );
@@ -278,6 +313,7 @@ function MapContainerF(props) {
             ) : (
               <CustomInfoWindow
                 title={props.activeMarker.title}
+                local={props.activeMarker.local}
                 recibe={props.activeMarker.recibe}
                 transact={props.activeMarker.transact}
                 eventName={props.activeMarker.eventName}

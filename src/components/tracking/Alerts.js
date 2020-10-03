@@ -16,6 +16,7 @@ import {
 } from "@material-ui/core";
 
 import RoomIcon from "@material-ui/icons/Room";
+import CloseIcon from '@material-ui/icons/Close';
 
 import Zoom from "./Zoom";
 import Atender from "./Atender";
@@ -32,6 +33,13 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.primary.main,
     height: "9%",
     paddingTop: "1vh",
+    position: "relative"
+  },
+  closeButton: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    color: theme.palette.secondary.light
   },
   contentContainer: {
     padding: "3vh 8vw",
@@ -222,6 +230,9 @@ function Alerts(props) {
         <Typography className={classes.title} align="center">
           Alertas activas
         </Typography>
+        <IconButton className={classes.closeButton} onClick={closeModal}>
+          <CloseIcon/>
+        </IconButton>
       </div>
       <div className={classes.contentContainer}>
         <div className={classes.alertasContainer}>

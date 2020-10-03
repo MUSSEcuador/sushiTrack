@@ -15,6 +15,8 @@ import {
 } from "@material-ui/core";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import SearchIcon from "@material-ui/icons/Search";
+import CloseIcon from '@material-ui/icons/Close';
+
 
 const CALL_DELIVERY = gql`
   mutation CallDeliveryToOffice(
@@ -37,6 +39,13 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.primary.main,
     height: "9%",
     paddingTop: "1vh",
+    position: "relative"
+  },
+  closeButton: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    color: theme.palette.secondary.light
   },
   contentContainer: {
     padding: "3vh 8vw",
@@ -183,6 +192,9 @@ function CallMotorizado(props) {
         <Typography className={classes.title} align="center">
           Selecciona el motorizado al que deseas llamar
         </Typography>
+        <IconButton className={classes.closeButton} onClick={closeModal}>
+          <CloseIcon/>
+        </IconButton>
       </div>
       <div className={classes.contentContainer}>
         <TextField

@@ -10,6 +10,8 @@ import {
   Box,
   TextField
 } from "@material-ui/core";
+
+import CloseIcon from '@material-ui/icons/Close';
 import LinkIcon from "@material-ui/icons/Link";
 
 const useStyles = makeStyles((theme) => ({
@@ -26,6 +28,13 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.primary.main,
     height: "25%",
     paddingTop: "1vh",
+    position: 'relative'
+  },
+  closeButton: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    color: theme.palette.secondary.light
   },
   contentContainer: {
     padding: "5vh 2vw",
@@ -83,6 +92,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 function TrackURL(props) {
   const classes = useStyles();
+  const {closeURL} = props;
 
   return (
     <div className={classes.root}>
@@ -90,6 +100,9 @@ function TrackURL(props) {
         <Typography className={classes.title} align="center">
           {"Enlace para el Rastreo"}
         </Typography>
+        <IconButton className={classes.closeButton} onClick={closeURL}>
+          <CloseIcon/>
+        </IconButton>
       </div>
       <div className={classes.contentContainer}>
         <Grid container>

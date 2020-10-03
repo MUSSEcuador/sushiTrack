@@ -1,7 +1,9 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 
-import { Typography, Link, Modal, Paper } from "@material-ui/core";
+import { Typography, Link, Modal, Paper, IconButton } from "@material-ui/core";
+
+import CloseIcon from '@material-ui/icons/Close';
 
 import EsperaInfo from "./EsperaInfo";
 
@@ -19,6 +21,13 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.primary.main,
     height: "15%",
     paddingTop: "1vh",
+    position: "relative"
+  },
+  closeButton: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    color: theme.palette.secondary.light
   },
   contentContainer: {
     padding: "1vh 2vw",
@@ -116,6 +125,9 @@ function OrderInfo(props) {
         <Typography className={classes.title} align="center">
           {order.name}
         </Typography>
+        <IconButton className={classes.closeButton} onClick={closeOrderInfo}>
+          <CloseIcon/>
+        </IconButton>
       </div>
       {order.currentRoute ? (
         <div className={classes.contentContainer}>

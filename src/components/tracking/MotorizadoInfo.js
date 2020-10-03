@@ -14,6 +14,7 @@ import {
   Modal,
 } from "@material-ui/core";
 
+
 import InputAdornment from "@material-ui/core/InputAdornment";
 import AirportShuttleIcon from "@material-ui/icons/AirportShuttle";
 import VisibilityIcon from "@material-ui/icons/Visibility";
@@ -412,7 +413,7 @@ function MotorizadoInfo(props) {
         disableAutoFocus={true}
       >
         <div>
-          <TrackURL url={urlToShow} />
+          <TrackURL url={urlToShow} closeURL={closeURL}/>
         </div>
       </Modal>
     </div>

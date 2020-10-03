@@ -551,7 +551,6 @@ function Track(props) {
   };
 
   const auxMarkerToShowCenter = (order)=>{
-    console.log(order)
     if (mapZoom === 16) {
       setMapZoom(15);
     } else {
@@ -646,6 +645,7 @@ function Track(props) {
         );
       });
     }
+
 
     return (
       <div className={classes.root}>
@@ -779,6 +779,7 @@ function Track(props) {
               longitud={longitud}
               mapZoom={mapZoom}
               transformed={transformed}
+              locales={locales}
               showRoute={showRoute}
               dataToShowRoute={dataToShowRoute}
               activeMarker={activeMarker}
