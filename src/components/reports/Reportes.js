@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import moment from "moment";
+import moment, { now } from "moment";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { gql } from "apollo-boost";
@@ -65,6 +65,14 @@ const JOURNAL = gql`
       }
     }
     getOrderDetail(transact: $transact, token: $token) {
+      route {
+        startDate
+        endDate
+        receipmentLatitude
+        receipmentLongitude
+        receipmentPhoto
+        receipmentComments
+      }
       orderAssigned {
         id
         deliveryId
@@ -172,8 +180,15 @@ function Reportes(props) {
     moment().format("yyyy-MM-DD")
   );
 
-  const [initFormatDate, setIFD] = React.useState(Date.now());
-  const [endFormatDate, setEFD] = React.useState(Date.now());
+  let auxInitialValue = new Date();
+  let auxStartEndDte = auxInitialValue;
+  auxInitialValue.setMinutes(0);
+  auxInitialValue.setSeconds(0);
+  auxInitialValue.setMilliseconds(0);
+  auxInitialValue.setHours(-5);
+
+  const [initFormatDate, setIFD] = React.useState(auxInitialValue.getTime());
+  const [endFormatDate, setEFD] = React.useState(auxStartEndDte.getTime());
   const [ciudadFormat, setCF] = React.useState("");
   const [ciudades] = React.useState(localStorage.cities.split(","));
   const [ciudad, setCiudad] = React.useState("TODAS");
@@ -182,18 +197,17 @@ function Reportes(props) {
   const [filteredOrders, setFilteredOrders] = React.useState([]);
   const [dataFromJournal, setDFJ] = React.useState(null);
   const [dataFromDetail, setDFD] = React.useState(null);
+  const [dataFromDetailRoute, setDFDR] = React.useState(null);
   const [showRoute, setShowRoute] = React.useState(false);
   const [dataToShowRoute, setDataToShowRoute] = React.useState(null);
   const [markers, setMarkers] = React.useState(null);
-  const initDate = Date.now();
-  const endDate = Date.now();
-  const initialCity = "";
+  const [enableDescargar, setEnableDescargar] = React.useState(false);
   const iniTransact = "123";
 
   const [deliveryQuery, setDeliveryQuery] = React.useState({
-    StartDate: initDate,
-    EndDate: endDate,
-    City: initialCity,
+    StartDate: initFormatDate,
+    EndDate: endFormatDate,
+    City: ciudadFormat,
   });
 
   const [transact, setTransact] = React.useState(iniTransact);
@@ -203,6 +217,7 @@ function Reportes(props) {
       deliveryQuery,
       token: sessionStorage.token,
     },
+    fetchPolicy: "network-only",
   });
 
   const [getRouteHistory, routeHistory] = useLazyQuery(JOURNAL, {
@@ -227,13 +242,14 @@ function Reportes(props) {
     }
   }, [transact]);
 
-
   useEffect(() => {
     if (routeHistory.data?.getRouteHistory) {
       setDFJ(routeHistory.data.getRouteHistory);
     } else setDFJ(null);
     if (routeHistory.data?.getOrderDetail) {
-      setDFD(routeHistory.data.getOrderDetail.orderAssigned);
+      let auxOrderAssingned = routeHistory.data.getOrderDetail.orderAssigned;
+      setDFD(auxOrderAssingned);
+      setDFDR(routeHistory.data.getOrderDetail.route);
     }
   }, [routeHistory.data]);
 
@@ -266,7 +282,6 @@ function Reportes(props) {
     }
   };
 
-
   const buscar = (e) => {
     const newQuery = {
       StartDate: initFormatDate,
@@ -296,10 +311,21 @@ function Reportes(props) {
         }
         cont++;
       });
+      if (
+        dataFromDetailRoute?.receipmentLatitude &&
+        dataFromDetailRoute?.receipmentLongitude
+      ) {
+        let newPoint = {
+          lat: dataFromDetailRoute.receipmentLatitude,
+          lng: dataFromDetailRoute.receipmentLongitude,
+        };
+        points.push(newPoint);
+      }
       setDataToShowRoute(points);
       setMarkers(marks);
     }
   };
+
 
   const getDireccion = () => {
     let dir = "";
@@ -318,43 +344,37 @@ function Reportes(props) {
     return dir;
   };
 
+  const getBase64FromURL = (url, callback) => {
+    fetch(url)
+      .then((res) => res.blob())
+      .then((blob) => {
+        var fr = new FileReader();
+        fr.onloadend = () => {
+          const b64 = fr.result;
+          console.log(b64);
+          callback(b64);
+        };
+        fr.readAsDataURL(blob);
+      });
+  };
+
   const getGraphic = () => {
-    let doc = new jsPDF();
-    let img = new Image();
-    img.src = "img/logo.png";
-    doc.rect(0, 0, 210, 30, "F");
-    doc.addImage(img, "PNG", 10, 9, 50, 12);
-    doc.setTextColor("red");
-    doc.setFontSize(16);
-    doc.text("RESUMEN DE ORDEN", 100, 20, "center");
-    doc.setTextColor("black");
-    doc.setFontSize(12);
-    let orden = "Número de orden: " + transact;
-    doc.text(orden, 20, 40);
-    const client =
-      "Cliente: " +
-      dataFromDetail.order.client.name +
-      " " +
-      dataFromDetail.order.client.lastname;
-    doc.text(client, 20, 50);
-    const directions = "Dirección: " + getDireccion();
-    doc.text(directions, 20, 60);
-    if (dataToShowRoute) {
+    if (dataToShowRoute && dataToShowRoute.length>1) {
       let route = dataToShowRoute;
-      if (route.length > 30){
-        let size= route.length;
-        const interval = Math.floor(size/27.0);
+      if (route.length > 30) {
+        let size = route.length;
+        const interval = Math.floor(size / 27.0);
         let auxPoints = [route[0]];
-        for (let index = 1; index < size; index+=interval) {
-         auxPoints.push(route[index]);
+        for (let index = 1; index < size; index += interval) {
+          auxPoints.push(route[index]);
         }
-  
-        auxPoints.push(route[size-1]);
+
+        auxPoints.push(route[size - 1]);
         route = auxPoints;
       }
       let url = `
                 https://maps.googleapis.com/maps/api/staticmap?&size=512x512&maptype=roadmap&markers=size:tiny|color:red|`;
-                route.forEach((data) => {
+      route.forEach((data) => {
         url = url + "|" + data.lat + "," + data.lng;
       });
 
@@ -363,48 +383,101 @@ function Reportes(props) {
         url = url + "|" + data.lat + "," + data.lng;
       });
       url = url + "&key=AIzaSyDGA3CpMqhCRFj6RPuQkfkHnw9l0sGTUx4";
-      let imgData = url;
-      doc.addImage(imgData, "JPEG", 20, 70, 170, 180);
+      console.log(url);
+
+      getBase64FromURL(url, (googleMapsb64) => {
+        console.log(googleMapsb64);
+
+        let doc = new jsPDF();
+        let img = new Image();
+        img.src = "img/logo.png";
+        doc.rect(0, 0, 210, 30, "F");
+        doc.addImage(img, "PNG", 10, 9, 50, 12);
+        doc.setTextColor("red");
+        doc.setFontSize(16);
+        doc.text("RESUMEN DE ORDEN", 100, 20, "center");
+        doc.setTextColor("black");
+        doc.setFontSize(12);
+        let orden = "Número de orden: " + transact;
+        let delivery = "";
+         if (dataFromDetail?.deliveryId)
+         {
+          delivery = " - Motorizado: " + dataFromDetail.deliveryId
+         }
+        
+        doc.text(orden + delivery , 20, 40);
+        const client =
+          "Cliente: " +
+          dataFromDetail.order.client.name +
+          " " +
+          dataFromDetail.order.client.lastname;
+        doc.text(client, 20, 50);
+        const directions = "Dirección: " + getDireccion();
+        doc.text(directions, 20, 60);
+        if (dataFromDetailRoute) {
+          let startStringDate = new Date(dataFromDetailRoute?.startDate);
+          console.log(startStringDate)
+          let endStringDate = new Date(dataFromDetailRoute?.endDate);
+          console.log(endStringDate)
+          const startDate =
+            "Fecha y hora de inicio: " + startStringDate.toLocaleString();
+          doc.text(startDate, 20, 70);
+          const endDate = "Fecha y hora de fin: " + endStringDate.toLocaleString();
+          doc.text(endDate, 20, 80);
+
+          const photo =
+            "data:image/jpeg;base64," + dataFromDetailRoute.receipmentPhoto;
+          doc.addImage(photo, "JPEG", 80, 90, 50, 50);
+        }
+        doc.text("Ruta seguida", 20, 150);
+        doc.addImage(googleMapsb64, "PNG", 20, 155, 170, 120);
+
+        doc.addPage();
+        doc.rect(0, 0, 210, 30, "F");
+        doc.addImage(img, "PNG", 10, 9, 50, 12);
+        doc.setTextColor("red");
+        doc.setFontSize(16);
+        doc.text("PEDIDO", 100, 20, "center");
+        doc.setTextColor("black");
+        doc.setFontSize(12);
+
+        const items = dataFromDetail.order?.items.map((el) => {
+          return [el.description, el.quantity];
+        });
+        doc.autoTable({
+          margin: { top: 40 },
+          head: [["DESCRIPCION", "CANTIDAD"]],
+          body: items,
+        });
+
+        const data = dataFromJournal.journal.map((el) => {
+          let auxDate = moment(el.date);
+          auxDate = auxDate.toLocaleString();
+          return [
+            estados[el.eventName],
+            el.deliveryId,
+            auxDate,
+            el.description,
+          ];
+        });
+        doc.addPage();
+        doc.rect(0, 0, 210, 30, "F");
+        doc.addImage(img, "PNG", 10, 9, 50, 12);
+        doc.setTextColor("red");
+        doc.setFontSize(16);
+        doc.text("RUTA RECORRIDA", 100, 20, "center");
+        doc.setTextColor("black");
+        doc.setFontSize(12);
+
+        doc.autoTable({
+          margin: { top: 40 },
+          head: [["ESTADO", "DELIVERY", "FECHA Y HORA", "DESCRIPCION"]],
+          body: data,
+        });
+
+        doc.save("resumen.pdf");
+      });
     }
-    doc.addPage();
-    doc.rect(0, 0, 210, 30, "F");
-    doc.addImage(img, "PNG", 10, 9, 50, 12);
-    doc.setTextColor("red");
-    doc.setFontSize(16);
-    doc.text("PEDIDO", 100, 20, "center");
-    doc.setTextColor("black");
-    doc.setFontSize(12);
-
-    const items = dataFromDetail.order?.items.map((el) => {
-      return [el.description, el.quantity];
-    });
-    doc.autoTable({
-      margin: { top: 40 },
-      head: [["DESCRIPCION", "CANTIDAD"]],
-      body: items,
-    });
-
-    const data = dataFromJournal.journal.map((el) => {
-      let auxDate = moment(el.date);
-      auxDate = auxDate.toLocaleString();
-      return [estados[el.eventName], el.deliveryId, auxDate, el.description];
-    });
-    doc.addPage();
-    doc.rect(0, 0, 210, 30, "F");
-    doc.addImage(img, "PNG", 10, 9, 50, 12);
-    doc.setTextColor("red");
-    doc.setFontSize(16);
-    doc.text("RUTA RECORRIDA", 100, 20, "center");
-    doc.setTextColor("black");
-    doc.setFontSize(12);
-
-    doc.autoTable({
-      margin: { top: 40 },
-      head: [["ESTADO", "DELIVERY", "FECHA Y HORA", "DESCRIPCION"]],
-      body: data,
-    });
-
-    doc.save("resumen.pdf");
   };
 
   return (
@@ -419,7 +492,9 @@ function Reportes(props) {
             type="date"
             onChange={(e) => {
               let auxDate = new Date(e.target.value);
+              console.log(auxDate);
               auxDate = auxDate.getTime();
+              console.log(auxDate);
               setIFD(auxDate);
               setAllOrders([]);
               setDFJ(null);
@@ -447,7 +522,11 @@ function Reportes(props) {
             type="date"
             onChange={(e) => {
               let auxDate = new Date(e.target.value);
+              auxDate.setDate(auxDate.getDate() + 1);
+              console.log(e.target.value);
+              console.log(auxDate);
               auxDate = auxDate.getTime();
+              console.log(auxDate);
               setAllOrders([]);
               setDFJ(null);
               setDFD(null);
@@ -554,8 +633,9 @@ function Reportes(props) {
                     <ListItem
                       alignItems="flex-start"
                       onClick={() => {
+                        // setShowMap(false);
                         setShowMap(false);
-                        setShowMap(false);
+                        setEnableDescargar(false);
                         setTransact(orden.order.transact);
                       }}
                     >
@@ -679,6 +759,7 @@ function Reportes(props) {
                 variant="contained"
                 onClick={() => {
                   prepareData();
+                  setEnableDescargar(true);
                 }}
               >
                 DIBUJAR RUTA
@@ -688,7 +769,7 @@ function Reportes(props) {
               <Button
                 className={classes.button}
                 variant="contained"
-                disabled={!dataToShowRoute}
+                disabled={!dataToShowRoute || dataToShowRoute.length===0 || !enableDescargar}
                 onClick={() => {
                   getGraphic();
                 }}

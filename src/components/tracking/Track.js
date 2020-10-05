@@ -359,7 +359,7 @@ function Track(props) {
   const [locales, setLocales] = React.useState([]);
 
   const [startAlert] = React.useState(
-    parseFloat(Date.now() - 7 * 24 * 3600 * 1000)
+    parseFloat(Date.now() - 1 * 24 * 3600 * 1000)
   );
   // const [endAlert, setEndAlert] = React.useState(Date.now());
   const [queryAlert, setQueryAlert] = React.useState({
@@ -486,6 +486,7 @@ function Track(props) {
       }
     }
   }, [stores.data]);
+
 
   useEffect(() => {
     if (stores.data) {
