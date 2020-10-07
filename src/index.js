@@ -1,22 +1,22 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from "react";
+import ReactDOM from "react-dom";
 
-import ApolloClient from 'apollo-boost';
+import ApolloClient from "apollo-boost";
 
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import "./index.css";
+import App from "./App";
+import * as serviceWorker from "./serviceWorker";
 
 const client = new ApolloClient({
   // uri: 'http://192.168.100.3:2000/graphql',
- uri: 'https://sushi-tracking.azurewebsites.net/graphql', 
+  uri: "https://sushi-tracking.azurewebsites.net/graphql",
 });
 
 ReactDOM.render(
   // <React.StrictMode>
-    <App client={client}/>,
+  <App client={client} />,
   // </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById("root")
 );
 
 // If you want your app to work offline and load faster, you can change

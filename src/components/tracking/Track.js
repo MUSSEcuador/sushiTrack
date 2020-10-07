@@ -6,6 +6,7 @@ import { gql } from "apollo-boost";
 import { useQuery } from "@apollo/react-hooks";
 
 import { Grid, TextField, IconButton, Button } from "@material-ui/core";
+import { useLazyQuery } from "@apollo/react-hooks";
 
 import InputAdornment from "@material-ui/core/InputAdornment";
 import SearchIcon from "@material-ui/icons/Search";
@@ -45,7 +46,6 @@ const DATOS = gql`
           }
         }
         currentRoute {
-          id
           deliveryId
           order {
             origin {
@@ -93,7 +93,6 @@ const DATOS = gql`
           }
         }
         ordersAssigned {
-          id
           deliveryId
           order {
             origin {
@@ -342,7 +341,8 @@ function Track(props) {
   const [token] = React.useState(sessionStorage.token);
   const { loading, error, data } = useQuery(DATOS, {
     variables: { token },
-    pollInterval: 3000,
+    //pollInterval: 3000,
+    fetchPolicy: "no-cache",
   });
 
   const [delOrLoc, setDelOrLoc] = React.useState(true);
@@ -377,6 +377,7 @@ function Track(props) {
     City: cityFilter === "TODAS" ? "" : cityFilter,
     OrderState: 0,
   });
+
   const stores = useQuery(STORES, {
     variables: { token },
     pollInterval: 300000,
@@ -398,7 +399,7 @@ function Track(props) {
       token,
       deliveryQuery,
     },
-    pollInterval: 3000,
+    //pollInterval: 3000,
   });
 
   //FUNCTIONS
@@ -446,10 +447,11 @@ function Track(props) {
         OrderState: 0,
       };
       setDeliveryQuery(auxnoAtendidasQuery);
-    }, 5000);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, []);
+
   useEffect(() => {
     if (alertsQuery.data) {
       setAlerts(alertsQuery.data.getAlerts);
@@ -563,7 +565,7 @@ function Track(props) {
   }
 
   const showOrderRoute = (order) => {
-    const data = [
+    const dataOrder = [
       {
         lat: order.lastPosition.latitude,
         lng: order.lastPosition.longitude,
@@ -573,7 +575,7 @@ function Track(props) {
         lng: order.currentRoute.order.destination.longitude,
       },
     ];
-    setDataToShowRoute(data);
+    setDataToShowRoute(dataOrder);
     setShowRoute(true);
   };
 
@@ -646,7 +648,6 @@ function Track(props) {
         );
       });
     }
-
 
     return (
       <div className={classes.root}>
