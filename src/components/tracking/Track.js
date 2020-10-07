@@ -341,7 +341,7 @@ function Track(props) {
   const [token] = React.useState(sessionStorage.token);
   const { loading, error, data } = useQuery(DATOS, {
     variables: { token },
-    //pollInterval: 3000,
+    pollInterval: 3000,
     fetchPolicy: "no-cache",
   });
 
@@ -399,7 +399,7 @@ function Track(props) {
       token,
       deliveryQuery,
     },
-    //pollInterval: 3000,
+    pollInterval: 3000,
   });
 
   //FUNCTIONS
