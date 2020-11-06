@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { gql } from "apollo-boost";
 import { useMutation } from "@apollo/react-hooks";
@@ -15,8 +15,7 @@ import {
 } from "@material-ui/core";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import SearchIcon from "@material-ui/icons/Search";
-import CloseIcon from '@material-ui/icons/Close';
-
+import CloseIcon from "@material-ui/icons/Close";
 
 const CALL_DELIVERY = gql`
   mutation CallDeliveryToOffice(
@@ -29,7 +28,7 @@ const CALL_DELIVERY = gql`
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    height: "80vh",
+    height: "90vh",
     width: "70vw",
     backgroundColor: theme.palette.primary.light,
     boxShadow: "3px 3px 25px rgb(0,0,0)",
@@ -39,13 +38,13 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.primary.main,
     height: "9%",
     paddingTop: "1vh",
-    position: "relative"
+    position: "relative",
   },
   closeButton: {
     position: "absolute",
     top: 2,
     right: 2,
-    color: theme.palette.secondary.light
+    color: theme.palette.secondary.light,
   },
   contentContainer: {
     padding: "3vh 8vw",
@@ -68,25 +67,23 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: "2vh",
     [theme.breakpoints.down("sm")]: {
       maxHeight: "20vh",
-      fontSize: "0.9em"
+      fontSize: "0.9em",
     },
-
   },
   listItem: {
     [theme.breakpoints.down("sm")]: {
-      fontSize: "0.8em"
+      fontSize: "0.8em",
     },
   },
   seleccionado: {
     padding: "0 2vw",
     [theme.breakpoints.down("sm")]: {
-      fontSize: "0.8em"
+      fontSize: "0.8em",
     },
   },
   textField: {
-    margin: "2vh 2vw 0 0", 
+    margin: "2vh 2vw 0 0",
     padding: "0 2vw",
-
   },
   button: {
     position: "absolute",
@@ -112,6 +109,14 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.secondary.light,
   },
+  buttonSelected: {
+    backgroundColor: theme.palette.secondary.dark,
+    color: theme.palette.secondary.contrastText,
+  },
+  buttonNotSelected: {
+    backgroundColor: theme.palette.primary.light,
+    color: theme.palette.primary.dark,
+  },
 }));
 
 function CallMotorizado(props) {
@@ -120,16 +125,63 @@ function CallMotorizado(props) {
 
   const [filteredMoto, setFilteredMoto] = React.useState(motorizados);
   const [filter, setFilter] = React.useState("");
+  const [showCercanos, setShowCercanos] = React.useState(false);
   const [seleccionado, setSeleccionado] = React.useState(null);
   const [reason, setReason] = React.useState("");
   const [openSnack, setOpenSnack] = React.useState(false);
   const [callDeliveryToOffice] = useMutation(CALL_DELIVERY);
 
+  useEffect(() => {
+    if (showCercanos) {
+      getCercanos();
+    } else {
+      setFilter("");
+      setFilteredMoto(motorizados);
+    }
+  }, [showCercanos]);
+
+  const getCercanos = () => {
+    let cercanos = [];
+    motorizados.forEach((m) => {
+      const distancia = calcCrow(
+        m.lastPosition.latitude,
+        m.lastPosition.longitude,
+        local.location.latitude,
+        local.location.longitude
+      );
+      if (distancia < 1) {
+        cercanos.push(m);
+      }
+    });
+    setFilter("");
+    setFilteredMoto(cercanos);
+  };
+  const calcCrow = (lat1, lon1, lat2, lon2) => {
+    var R = 6371; // km
+    var dLat = toRad(lat2 - lat1);
+    var dLon = toRad(lon2 - lon1);
+    var lat1 = toRad(lat1);
+    var lat2 = toRad(lat2);
+
+    var a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var d = R * c;
+    return d;
+  };
+
+  // Converts numeric degrees to radians
+  const toRad = (Value) => {
+    return (Value * Math.PI) / 180;
+  };
+
   const filterMotorizados = (e) => {
     setFilter(e.target.value);
     if (e.target.value) {
       const filterAux = e.target.value.toLowerCase();
-      const filtered = motorizados.filter((el) => {
+      // const filtered = motorizados.filter((el) => {
+        const filtered = filteredMoto.filter((el) => {
         return (
           el.name.toLowerCase().includes(filterAux) ||
           el.firstName.toLowerCase().includes(filterAux) ||
@@ -139,17 +191,20 @@ function CallMotorizado(props) {
 
       setFilteredMoto(filtered);
     } else {
-      setFilteredMoto(motorizados);
+      if (showCercanos) {
+        getCercanos()
+      } else {
+        setFilteredMoto(motorizados);
+      }
     }
   };
 
   const onCall = () => {
-    let auxReason
-    if (reason===""){
-      auxReason = "Regrese al local"
-    }
-    else{
-      auxReason = reason
+    let auxReason;
+    if (reason === "") {
+      auxReason = "Regrese al local";
+    } else {
+      auxReason = reason;
     }
     const auxCallData = {
       deliveryId: seleccionado.name,
@@ -161,7 +216,7 @@ function CallMotorizado(props) {
         latitude: local.location.latitude,
         longitude: local.location.longitude,
       },
-      reason: auxReason
+      reason: auxReason,
     };
 
     callDeliveryToOffice({
@@ -193,15 +248,34 @@ function CallMotorizado(props) {
           Selecciona el motorizado al que deseas llamar
         </Typography>
         <IconButton className={classes.closeButton} onClick={closeModal}>
-          <CloseIcon/>
+          <CloseIcon />
         </IconButton>
       </div>
       <div className={classes.contentContainer}>
+        <Button
+          className={
+            showCercanos ? classes.buttonNotSelected : classes.buttonSelected
+          }
+          onClick={() => {
+            setShowCercanos(false);
+          }}
+        >
+          Todos
+        </Button>
+        <Button
+          className={
+            !showCercanos ? classes.buttonNotSelected : classes.buttonSelected
+          }
+          onClick={() => {
+            setShowCercanos(true);
+          }}
+        >
+          Cercanos
+        </Button>
         <TextField
           size="small"
           fullWidth
           placeholder="Motorizado"
-
           value={filter}
           onChange={(e) => {
             filterMotorizados(e);
@@ -224,7 +298,6 @@ function CallMotorizado(props) {
                   <Divider />
                   <ListItem
                     alignItems="flex-start"
-                    
                     onClick={() => {
                       setSeleccionado(persona);
                     }}
@@ -270,20 +343,21 @@ function CallMotorizado(props) {
               local.address.secondaryStreet}
           </Typography>
           <TextField
-          label="Ingrese el motivo de la llamada"
-          placeholder="Motivo"
-          fullWidth
-          value={reason}
-          className={classes.textField}
-          onChange={(e)=>{setReason(e.target.value)}}
-
-          InputLabelProps={{
-            shrink: true,
-            style: {
-              fontWeight: 500,
-              paddingLeft: "1vw",
-            },
-          }}
+            label="Ingrese el motivo de la llamada"
+            placeholder="Motivo"
+            fullWidth
+            value={reason}
+            className={classes.textField}
+            onChange={(e) => {
+              setReason(e.target.value);
+            }}
+            InputLabelProps={{
+              shrink: true,
+              style: {
+                fontWeight: 500,
+                paddingLeft: "1vw",
+              },
+            }}
           />
           <Button
             className={classes.button}
