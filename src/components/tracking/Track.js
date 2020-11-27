@@ -23,6 +23,7 @@ const DATOS = gql`
   query GetSystemStats($token: String!) {
     getSystemStats(token: $token) {
       deliveries {
+        externalPlatformToken
         hasActiveDeliveries
         name
         firstName

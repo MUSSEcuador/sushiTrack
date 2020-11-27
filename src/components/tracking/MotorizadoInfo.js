@@ -14,7 +14,6 @@ import {
   Modal,
 } from "@material-ui/core";
 
-
 import InputAdornment from "@material-ui/core/InputAdornment";
 import AirportShuttleIcon from "@material-ui/icons/AirportShuttle";
 import VisibilityIcon from "@material-ui/icons/Visibility";
@@ -61,6 +60,26 @@ const useStyles = makeStyles((theme) => ({
     width: "99%",
     boxShadow: "2px 2px 5px rgb(100,100,100)",
     backgroundColor: theme.palette.error.light,
+    [theme.breakpoints.down("sm")]: {
+      width: "95%",
+    },
+    position: "relative",
+  },
+  externalWithRoute: {
+    margin: "0.5vh 0vw ",
+    width: "99%",
+    boxShadow: "2px 2px 5px rgb(100,100,100)",
+    backgroundColor: theme.palette.info.light,
+    [theme.breakpoints.down("sm")]: {
+      width: "95%",
+    },
+    position: "relative",
+  },
+  externalWithoutRoute: {
+    margin: "0.5vh 0vw",
+    width: "99%",
+    boxShadow: "2px 2px 5px rgb(100,100,100)",
+    backgroundColor: theme.palette.warning.light,
     [theme.breakpoints.down("sm")]: {
       width: "95%",
     },
@@ -229,12 +248,28 @@ function MotorizadoInfo(props) {
       });
   };
 
+  const getClass = (hasActiveDeliveries, externalPlatformToken) => {
+    if (hasActiveDeliveries && externalPlatformToken === "SUSHICORP") {
+      return classes.withRoute;
+    }
+    if (hasActiveDeliveries && externalPlatformToken !== "SUSHICORP") {
+      return classes.externalWithRoute;
+    }
+    if (!hasActiveDeliveries && externalPlatformToken === "SUSHICORP") {
+      return classes.withoutRoute;
+    }
+    if (!hasActiveDeliveries && externalPlatformToken !== "SUSHICORP") {
+      return classes.externalWithoutRoute;
+    }
+  };
+
   return (
     <div>
       <Box
-        className={
-          order.hasActiveDeliveries ? classes.withRoute : classes.withoutRoute
-        }
+        className={getClass(
+          order.hasActiveDeliveries,
+          order.externalPlatformToken
+        )}
       >
         {calculateDelay() > 5 ? (
           <p className={classes.alerta}>
@@ -373,7 +408,7 @@ function MotorizadoInfo(props) {
               </InputAdornment>
             </Tooltip>
           </Grid>
-          {order.currentRoute? (
+          {order.currentRoute ? (
             <Grid item xs={1}>
               <Tooltip title="Generar URL" enterDelay={400} leaveDelay={200}>
                 <InputAdornment position="start">
@@ -413,7 +448,7 @@ function MotorizadoInfo(props) {
         disableAutoFocus={true}
       >
         <div>
-          <TrackURL url={urlToShow} closeURL={closeURL}/>
+          <TrackURL url={urlToShow} closeURL={closeURL} />
         </div>
       </Modal>
     </div>
