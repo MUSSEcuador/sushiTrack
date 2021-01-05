@@ -22,9 +22,11 @@ import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import CallEndIcon from "@material-ui/icons/CallEnd";
 import EmojiTransportationIcon from "@material-ui/icons/EmojiTransportation";
 import LinkIcon from "@material-ui/icons/Link";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 import OrderInfo from "./OrderInfo";
 import TrackURL from "./TrackURL";
+import ConfirmDeleteDelivery from "./ConfirmDeleteDelivery";
 
 const CANCEL_CALL = gql`
   mutation StopCallDeliveryToOffice(
@@ -126,6 +128,17 @@ const useStyles = makeStyles((theme) => ({
   activo: {
     color: theme.palette.secondary.main,
   },
+  tooltipMotorizado: {
+    position: "absolute",
+    right: "45px",
+    bottom: "20px",
+    width: "5px",
+  },
+  deleteMotorizado: {
+    backgroundColor: "rgba(120,120,120, 0.4)",
+    color: theme.palette.primary.light,
+    boxShadow: "0px 0px 20px rgb(200,200,200)",
+  },
   iconsList: {
     marginTop: "2px",
     marginBottom: "2px",
@@ -156,6 +169,9 @@ function MotorizadoInfo(props) {
   const [openInfo, setOpenInfo] = React.useState(false);
   const [openURL, setOpenURL] = React.useState(false);
   const [sendOpenURL, setSendOpenURL] = React.useState(false);
+
+  const [openConfirmModal, setOpenConfirmModal] = React.useState(false);
+
   const [stopCallDeliveryToOffice] = useMutation(CANCEL_CALL);
 
   const [getURL, url] = useLazyQuery(GET_URL, {
@@ -212,6 +228,9 @@ function MotorizadoInfo(props) {
 
   const closeModal = () => {
     setOpenInfo(false);
+  };
+  const closeConfirm = () => {
+    setOpenConfirmModal(false);
   };
 
   const closeURL = () => {
@@ -424,6 +443,30 @@ function MotorizadoInfo(props) {
               </Tooltip>
             </Grid>
           ) : null}
+          {calculateDelay() > 500 ? (
+            <>
+
+              <Tooltip
+                className={classes.tooltipMotorizado}
+                title="Eliminar motorizado"
+                enterDelay={400}
+                leaveDelay={200}
+              >
+                <InputAdornment position="end">
+                  <IconButton
+                    size="small"
+                    className={classes.deleteMotorizado}
+                    onClick={(e) => {
+                      setOpenConfirmModal(true);
+                    }}
+                  >
+                    {<DeleteIcon />}
+                  </IconButton>
+                </InputAdornment>
+              </Tooltip>
+              {/* </Grid> */}
+            </>
+          ) : null}
         </Grid>
       </Box>
       <Modal
@@ -449,6 +492,17 @@ function MotorizadoInfo(props) {
       >
         <div>
           <TrackURL url={urlToShow} closeURL={closeURL} />
+        </div>
+      </Modal>
+      <Modal
+        open={openConfirmModal}
+        onClose={closeConfirm}
+        className={classes.modal}
+      >
+        <div>
+          <ConfirmDeleteDelivery closeConfirm={closeConfirm}
+           seleccionado={order} 
+           />
         </div>
       </Modal>
     </div>
