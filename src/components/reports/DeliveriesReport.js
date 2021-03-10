@@ -178,6 +178,8 @@ function DeliveriesReport(props) {
   }, [generalInputQuery, getGeneralReport]);
 
   useEffect(() => {
+    console.log(report.data)
+    console.log("vino aqui")
     if (report.data?.getGeneralReport) {
       setHasInfoToShow(true);
       changePageSize(pageSizeSelected, false);
@@ -187,6 +189,7 @@ function DeliveriesReport(props) {
     }
   }, [report.data]);
 
+  console.log(cargandoDatos);
   const buscar = (e) => {
     const newQuery = {
       StartDate: initFormatDate,
@@ -218,7 +221,7 @@ function DeliveriesReport(props) {
     const val = value;
     let auxPageSize = 10;
     setPageSizeSelected(val);
-    setCargandoDatos(true);
+    
 
     switch (val) {
       case "10":
@@ -250,6 +253,7 @@ function DeliveriesReport(props) {
     }
     setPageSize(auxPageSize);
     if (sendFromChangePage) {
+      setCargandoDatos(true);
       const newQuery = {
         StartDate: initFormatDate,
         EndDate: endFormatDate,
