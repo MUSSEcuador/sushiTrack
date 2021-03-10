@@ -351,7 +351,7 @@ function Reportes(props) {
         var fr = new FileReader();
         fr.onloadend = () => {
           const b64 = fr.result;
-          console.log(b64);
+
           callback(b64);
         };
         fr.readAsDataURL(blob);
@@ -383,10 +383,10 @@ function Reportes(props) {
         url = url + "|" + data.lat + "," + data.lng;
       });
       url = url + "&key=AIzaSyDGA3CpMqhCRFj6RPuQkfkHnw9l0sGTUx4";
-      console.log(url);
+
 
       getBase64FromURL(url, (googleMapsb64) => {
-        console.log(googleMapsb64);
+
 
         let doc = new jsPDF();
         let img = new Image();
@@ -416,9 +416,9 @@ function Reportes(props) {
         doc.text(directions, 20, 60);
         if (dataFromDetailRoute) {
           let startStringDate = new Date(dataFromDetailRoute?.startDate);
-          console.log(startStringDate)
+
           let endStringDate = new Date(dataFromDetailRoute?.endDate);
-          console.log(endStringDate)
+
           const startDate =
             "Fecha y hora de inicio: " + startStringDate.toLocaleString();
           doc.text(startDate, 20, 70);
@@ -492,9 +492,9 @@ function Reportes(props) {
             type="date"
             onChange={(e) => {
               let auxDate = new Date(e.target.value);
-              console.log(auxDate);
+
               auxDate = auxDate.getTime();
-              console.log(auxDate);
+
               setIFD(auxDate);
               setAllOrders([]);
               setDFJ(null);
@@ -523,10 +523,9 @@ function Reportes(props) {
             onChange={(e) => {
               let auxDate = new Date(e.target.value);
               auxDate.setDate(auxDate.getDate() + 1);
-              console.log(e.target.value);
-              console.log(auxDate);
+
               auxDate = auxDate.getTime();
-              console.log(auxDate);
+
               setAllOrders([]);
               setDFJ(null);
               setDFD(null);

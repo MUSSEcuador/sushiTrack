@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from '@material-ui/core';
 
@@ -42,11 +42,21 @@ const useStyles = makeStyles((theme) => ({
 function Loading(props) {
     const classes = useStyles()
 
+    const [textToShow, setTextToShow] = React.useState("Bienvenido");
+
+    useEffect(() => {
+        if (props.text)
+        {
+            setTextToShow(props.text)
+        }
+    }, [])
+
+
     return (
         <div className={classes.root}>
              <img alt="logo" src="/img/logo.png" className={classes.logo}></img>
              <Typography className={classes.title}>
-                 Bienvenido
+                 {textToShow}
              </Typography>
              <Typography className={classes.subtitle}>
                  Espera un momento, estamos cargando los datos necesarios

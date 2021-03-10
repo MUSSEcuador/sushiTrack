@@ -7,7 +7,7 @@ const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
 
 class Download extends React.Component {
   render() {
-    console.log(this.props.element);
+
     let data = this.props.element.slice();
     let newOrders = [];
     let newAuths = [];
@@ -41,7 +41,7 @@ class Download extends React.Component {
         });
       });
     });
-    console.log(newAuths, newOrders);
+
     return (
       <ExcelFile element={<button>Descargar Datos</button>}>
         <ExcelSheet data={newOrders} name="Orders">

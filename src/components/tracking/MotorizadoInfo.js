@@ -202,7 +202,7 @@ function MotorizadoInfo(props) {
     if (url.data) {
       setURL(url.data?.getEncryptedTransact);
       setSendOpenURL(true);
-      console.log("open", url.data);
+
     }
   }, [url]);
 
@@ -240,7 +240,7 @@ function MotorizadoInfo(props) {
   };
 
   const onCancelCall = (param) => {
-    console.log(param);
+
     const auxCallData = {
       deliveryId: order.name,
       officeAddress: {
@@ -260,7 +260,7 @@ function MotorizadoInfo(props) {
       },
     })
       .then((r) => {
-        console.log(r.data);
+        
       })
       .catch((err) => {
         console.log(err);

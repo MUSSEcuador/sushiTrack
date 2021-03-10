@@ -48,11 +48,13 @@ function DeliveryOrder(props) {
             <Grid item xs={2}>
               <Typography> {el.Shop}</Typography>
             </Grid>
-            <Grid item xs={2}>
+            {
+              el.JournalInfo?
+              <Grid item xs={2}>
               <Typography> {el.JournalInfo[0].TripId}</Typography>
-            </Grid>
+            </Grid>:null}
             <Grid item xs={6}>
-              {el.JournalInfo.map((j, index) => {
+              {el.JournalInfo?el.JournalInfo.map((j, index) => {
                 return (
                   <Grid container key={index}>
                     <Grid item xs={6}>
@@ -63,7 +65,7 @@ function DeliveryOrder(props) {
                     </Grid>
                   </Grid>
                 );
-              })}
+              }):null}
             </Grid>
           </Grid>
         );

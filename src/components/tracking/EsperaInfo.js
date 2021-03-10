@@ -149,7 +149,7 @@ function EsperaInfo(props) {
   };
 
   const goToMap =()=>{
-    console.log(ordersAssigned.order)
+
     const auxToMap = {
       latitude : ordersAssigned.order.destination.latitude,
       longitude : ordersAssigned.order.destination.longitude,

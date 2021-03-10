@@ -209,7 +209,7 @@ function Alerts(props) {
   }, [data]);
 
   const goToMap = (al) => {
-    console.log(al);
+
     const auxToMap = {
       latitude: al.location.latitude,
       longitude: al.location.longitude,
