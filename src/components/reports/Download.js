@@ -22,10 +22,10 @@ class Download extends React.Component {
         ];
       }
       element.Orders.forEach((el) => {
-        console.log(el);
+
         if (el.JournalInfo) {
           el.JournalInfo.forEach((j) => {
-            console.log(j);
+   
             newOrders.push({
               DeliveryId: element.DeliveryId,
               Transact: el.Transact,

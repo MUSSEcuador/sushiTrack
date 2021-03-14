@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import { makeStyles } from "@material-ui/core/styles";
-import { Typography } from '@material-ui/core';
+import { Typography, CircularProgress } from '@material-ui/core';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -58,6 +58,7 @@ function Loading(props) {
              <Typography className={classes.title}>
                  {textToShow}
              </Typography>
+             <CircularProgress color="secondary"/>
              <Typography className={classes.subtitle}>
                  Espera un momento, estamos cargando los datos necesarios
              </Typography>
