@@ -7,7 +7,6 @@ const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
 
 class Download extends React.Component {
   render() {
-
     let data = this.props.element.slice();
     let newOrders = [];
     let newAuths = [];
@@ -18,16 +17,34 @@ class Download extends React.Component {
             Transact: "",
             DeliveryStatus: "",
             Shop: "",
+            Date: "",
           },
         ];
       }
       element.Orders.forEach((el) => {
-        newOrders.push({
-          DeliveryId: element.DeliveryId,
-          Transact: el.Transact,
-          DeliveryStatus: el.DeliveryStatus,
-          Shop: el.Shop,
-        });
+        console.log(el);
+        if (el.JournalInfo) {
+          el.JournalInfo.forEach((j) => {
+            console.log(j);
+            newOrders.push({
+              DeliveryId: element.DeliveryId,
+              Transact: el.Transact,
+              DeliveryStatus: el.DeliveryStatus,
+              Shop: el.Shop,
+              EventName: j.EventName,
+              Date: new Date(Date.parse(j.Date)).toLocaleString(),
+            });
+          });
+        } else {
+          newOrders.push({
+            DeliveryId: element.DeliveryId,
+            Transact: el.Transact,
+            DeliveryStatus: el.DeliveryStatus,
+            Shop: el.Shop,
+            EventName: "",
+            Date: "",
+          });
+        }
       });
 
       if (element.Auths.length === 0) {
@@ -37,7 +54,7 @@ class Download extends React.Component {
         newAuths.push({
           DeliveryId: element.DeliveryId,
           EventName: au.EventName,
-          Date: au.Date,
+          Date: new Date(Date.parse(au.Date)).toLocaleString(),
         });
       });
     });
@@ -48,6 +65,8 @@ class Download extends React.Component {
           <ExcelColumn label="Delivery" value="DeliveryId" />
           <ExcelColumn label="Transact" value="Transact" />
           <ExcelColumn label="Shop" value="Shop" />
+          <ExcelColumn label="EventName" value="EventName" />
+          <ExcelColumn label="Date" value="Date" />
         </ExcelSheet>
         <ExcelSheet data={newAuths} name="Auths">
           <ExcelColumn label="Delivery" value="DeliveryId" />

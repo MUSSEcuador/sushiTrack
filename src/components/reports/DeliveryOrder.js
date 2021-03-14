@@ -61,7 +61,7 @@ function DeliveryOrder(props) {
                       <Typography>{j.EventName}</Typography>
                     </Grid>
                     <Grid item xs={6}>
-                      <Typography>{j.Date}</Typography>
+                      <Typography>{new Date(Date.parse(j.Date)).toLocaleString()}</Typography>
                     </Grid>
                   </Grid>
                 );

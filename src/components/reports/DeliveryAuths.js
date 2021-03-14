@@ -32,7 +32,7 @@ function DeliveryAuths(props) {
               <Typography> {el.EventName}</Typography>
             </Grid>
             <Grid item xs={6}>
-              <Typography> {el.Date}</Typography>
+              <Typography> {new Date(Date.parse(el.Date)).toLocaleString()}</Typography>
             </Grid>
           </Grid>
         );

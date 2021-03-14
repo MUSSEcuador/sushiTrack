@@ -178,8 +178,7 @@ function DeliveriesReport(props) {
   }, [generalInputQuery, getGeneralReport]);
 
   useEffect(() => {
-    console.log(report.data)
-    console.log("vino aqui")
+
     if (report.data?.getGeneralReport) {
       setHasInfoToShow(true);
       changePageSize(pageSizeSelected, false);
@@ -189,7 +188,7 @@ function DeliveriesReport(props) {
     }
   }, [report.data]);
 
-  console.log(cargandoDatos);
+
   const buscar = (e) => {
     const newQuery = {
       StartDate: initFormatDate,
