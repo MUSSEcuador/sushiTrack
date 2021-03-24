@@ -532,6 +532,18 @@ function Track(props) {
     setLatitud(order.location.latitude + Math.random()*0.00001);
     setLongitud(order.location.longitude + Math.random()*0.00001);
   };
+
+  const recenterCity = (latitude, longitude) => {
+    if (mapZoom === 16) {
+      setMapZoom(15);
+    } else {
+      setMapZoom(16);
+    }
+    setShowRoute(false);
+    setLatitud(latitude + Math.random()*0.00001);
+    setLongitud(longitude + Math.random()*0.00001);
+  };
+
   const showOffice = (position) => {
     if (mapZoom === 16) {
       setMapZoom(15);
@@ -587,6 +599,7 @@ function Track(props) {
       setFilterM("");
     }
   };
+
 
   const filterLocales = (text, localesAux) => {
     if (text) {
@@ -656,6 +669,7 @@ function Track(props) {
           history={props.history}
           changeCity={changeCity}
           cityFilter={cityFilter}
+          recenterCity={recenterCity}
           cities={cities}
           auxMarkerToShowCenter={auxMarkerToShowCenter}
           setAuxMarkerToShow={setAuxMarkerToShow}
@@ -718,7 +732,7 @@ function Track(props) {
                 <div className={classes.vehMap}>
                   {transformed
                     ? transformed.map((order, index) => {
-                        return (
+                        return ( 
                           <MotorizadoInfo
                             order={order}
                             key={index}

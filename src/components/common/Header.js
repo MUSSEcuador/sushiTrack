@@ -84,6 +84,7 @@ function Header(props) {
     history,
     cities,
     changeCity,
+    recenterCity,
     alerts,
     isReport,
     setAuxMarkerToShow,
@@ -105,6 +106,7 @@ function Header(props) {
       setAlertsNumber(alerts.length);
     }
   }, [alerts]);
+
 
   return (
     <div className={classes.root}>
@@ -144,12 +146,14 @@ function Header(props) {
                 onClick={() => {
                   localStorage.setItem("citySelected", "TODAS");
                   changeCity("TODAS");
+                  recenterCity(-0.176663, -78.4845227);
                 }}
               >
                 TODAS
               </Button>
             ) : null}
             {cities?.map((el, index) => {
+
               return (
                 <Button
                   className={
@@ -159,6 +163,23 @@ function Header(props) {
                   onClick={() => {
                     localStorage.setItem("citySelected", el);
                     changeCity(el);
+                    switch (el.toUpperCase()) {
+                      case "QUITO":
+                        recenterCity(-0.176663, -78.4845227);
+                        break;
+                      case "GUAYAQUIL":
+                        recenterCity(-2.1595552, -79.8970075);
+                        break;
+                        case "CUENCA":
+                        recenterCity(-2.8989551, -78.4845227);
+                        break;
+                        case "MANTA":
+                          recenterCity(-0.9436228, -80.7338208);
+                          break;
+                      default:
+                        recenterCity(-0.176663, -79.0042444);
+                        break;
+                    }
                   }}
                 >
                   {el}
