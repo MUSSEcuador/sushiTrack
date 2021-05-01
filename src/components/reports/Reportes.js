@@ -326,7 +326,6 @@ function Reportes(props) {
     }
   };
 
-
   const getDireccion = () => {
     let dir = "";
     if (dataFromDetail.order.clientAddress.principalStreet) {
@@ -345,21 +344,20 @@ function Reportes(props) {
   };
 
   const getBase64FromURL = (url, callback) => {
-    fetch(url)
-      .then((res) => res.blob())
-      .then((blob) => {
+    fetch(url).then((res) => {
+      res.blob().then((blob) => {
         var fr = new FileReader();
         fr.onloadend = () => {
           const b64 = fr.result;
-
           callback(b64);
         };
         fr.readAsDataURL(blob);
       });
+    });
   };
 
   const getGraphic = () => {
-    if (dataToShowRoute && dataToShowRoute.length>1) {
+    if (dataToShowRoute && dataToShowRoute.length > 1) {
       let route = dataToShowRoute;
       if (route.length > 30) {
         let size = route.length;
@@ -372,8 +370,7 @@ function Reportes(props) {
         auxPoints.push(route[size - 1]);
         route = auxPoints;
       }
-      let url = `
-                https://maps.googleapis.com/maps/api/staticmap?&size=512x512&maptype=roadmap&markers=size:tiny|color:red|`;
+      let url = `https://maps.googleapis.com/maps/api/staticmap?&size=512x512&maptype=roadmap&markers=size:tiny|color:red|`;
       route.forEach((data) => {
         url = url + "|" + data.lat + "," + data.lng;
       });
@@ -382,12 +379,10 @@ function Reportes(props) {
       route.forEach((data) => {
         url = url + "|" + data.lat + "," + data.lng;
       });
-      url = url + "&key=AIzaSyDGA3CpMqhCRFj6RPuQkfkHnw9l0sGTUx4";
 
+      url = url + "&key=AIzaSyDgsuPP6lq7UZnKlxnC5bTAKvRiQe-He74";
 
       getBase64FromURL(url, (googleMapsb64) => {
-
-
         let doc = new jsPDF();
         let img = new Image();
         img.src = "img/logo.png";
@@ -400,12 +395,11 @@ function Reportes(props) {
         doc.setFontSize(12);
         let orden = "Número de orden: " + transact;
         let delivery = "";
-         if (dataFromDetail?.deliveryId)
-         {
-          delivery = " - Motorizado: " + dataFromDetail.deliveryId
-         }
-        
-        doc.text(orden + delivery , 20, 40);
+        if (dataFromDetail?.deliveryId) {
+          delivery = " - Motorizado: " + dataFromDetail.deliveryId;
+        }
+
+        doc.text(orden + delivery, 20, 40);
         const client =
           "Cliente: " +
           dataFromDetail.order.client.name +
@@ -422,7 +416,8 @@ function Reportes(props) {
           const startDate =
             "Fecha y hora de inicio: " + startStringDate.toLocaleString();
           doc.text(startDate, 20, 70);
-          const endDate = "Fecha y hora de fin: " + endStringDate.toLocaleString();
+          const endDate =
+            "Fecha y hora de fin: " + endStringDate.toLocaleString();
           doc.text(endDate, 20, 80);
 
           const photo =
@@ -430,6 +425,7 @@ function Reportes(props) {
           doc.addImage(photo, "JPEG", 80, 90, 50, 50);
         }
         doc.text("Ruta seguida", 20, 150);
+
         doc.addImage(googleMapsb64, "PNG", 20, 155, 170, 120);
 
         doc.addPage();
@@ -768,7 +764,11 @@ function Reportes(props) {
               <Button
                 className={classes.button}
                 variant="contained"
-                disabled={!dataToShowRoute || dataToShowRoute.length===0 || !enableDescargar}
+                disabled={
+                  !dataToShowRoute ||
+                  dataToShowRoute.length === 0 ||
+                  !enableDescargar
+                }
                 onClick={() => {
                   getGraphic();
                 }}
