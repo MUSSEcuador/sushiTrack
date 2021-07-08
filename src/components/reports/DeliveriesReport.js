@@ -84,6 +84,11 @@ const useStyles = makeStyles((theme) => ({
       width: "50vw",
     },
   },
+  deliveryName:{
+    fontWeight: 500,
+    fontSize: "1.4em",
+    padding: "1vh 1vw 0 1vw"
+  },
   hasInfo: {
     marginTop: "2vh",
   },
@@ -91,6 +96,9 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.secondary.light,
     fontWeight: 900,
     marginLeft: "3px",
+
+    fontSize: "1.1rem",
+    padding: "1vw",
   },
   select: {
     backgroundColor: theme.palette.primary.contrastText,
@@ -144,11 +152,19 @@ function DeliveriesReport(props) {
   const [cargandoDatos, setCargandoDatos] = React.useState(false);
 
   let auxInitialValue = new Date();
-  let auxStartEndDte = auxInitialValue;
+  let auxStartEndDte = new Date();
   auxInitialValue.setMinutes(0);
   auxInitialValue.setSeconds(0);
   auxInitialValue.setMilliseconds(0);
   auxInitialValue.setHours(-5);
+  auxInitialValue.setDate(auxInitialValue.getDate());
+
+
+  auxStartEndDte.setDate(auxStartEndDte.getDate() + 1);
+  auxStartEndDte.setMinutes(0);
+  auxStartEndDte.setSeconds(0);
+  auxStartEndDte.setMilliseconds(0);
+  auxStartEndDte.setHours(-5);
 
   const [initFormatDate, setIFD] = React.useState(auxInitialValue.getTime());
   const [endFormatDate, setEFD] = React.useState(auxStartEndDte.getTime());
@@ -172,22 +188,19 @@ function DeliveriesReport(props) {
 
   useEffect(() => {
     if (generalInputQuery) {
-      
       getGeneralReport();
     }
   }, [generalInputQuery, getGeneralReport]);
 
   useEffect(() => {
-
     if (report.data?.getGeneralReport) {
       setHasInfoToShow(true);
       changePageSize(pageSizeSelected, false);
     }
-    if(report.data && cargandoDatos){
+    if (report.data && cargandoDatos) {
       setCargandoDatos(false);
     }
   }, [report.data]);
-
 
   const buscar = (e) => {
     const newQuery = {
@@ -220,7 +233,6 @@ function DeliveriesReport(props) {
     const val = value;
     let auxPageSize = 10;
     setPageSizeSelected(val);
-    
 
     switch (val) {
       case "10":
@@ -265,7 +277,7 @@ function DeliveriesReport(props) {
   };
 
   if (cargandoDatos) {
-    return <Loading text={"Cargando Datos"}/>;
+    return <Loading text={"Cargando Datos"} />;
   } else {
     return (
       <div className={classes.root}>
@@ -290,7 +302,8 @@ function DeliveriesReport(props) {
                 style: {
                   color: "#ff0000",
                   fontWeight: 900,
-                  paddingLeft: "1vw",
+                  fontSize: "1.1rem",
+                  padding: "1vw",
                 },
               }}
             />
@@ -305,7 +318,7 @@ function DeliveriesReport(props) {
                 let auxDate = new Date(e.target.value);
                 auxDate.setDate(auxDate.getDate() + 1);
                 auxDate = auxDate.getTime();
-
+                console.log(auxDate);
                 setEFD(auxDate);
                 setHasInfoToShow(false);
                 setFinalDate(e.target.value);
@@ -316,7 +329,8 @@ function DeliveriesReport(props) {
                 style: {
                   color: "#ff0000",
                   fontWeight: 900,
-                  paddingLeft: "1vw",
+                  fontSize: "1.1rem",
+                  padding: "1vw",
                 },
               }}
             />
@@ -379,10 +393,10 @@ function DeliveriesReport(props) {
                 {report.data.getGeneralReport.Data.map((element, index) => {
                   return (
                     <div key={index} className={classes.card}>
-                      <Typography>{element.DeliveryId}</Typography>
+                      <Typography className={classes.deliveryName}>{element.DeliveryId}</Typography>
                       <Accordion>
                         <AccordionSummary
-                          expandIcon={<ExpandMoreIcon />}
+                          expandIcon={<ExpandMoreIcon color="secondary" />}
                           aria-controls="panel1a-content"
                           id="panel1a-header"
                         >
@@ -405,7 +419,7 @@ function DeliveriesReport(props) {
                       </Accordion>
                       <Accordion>
                         <AccordionSummary
-                          expandIcon={<ExpandMoreIcon />}
+                          expandIcon={<ExpandMoreIcon color="secondary" />}
                           aria-controls="panel2a-content"
                           id="panel2a-header"
                         >
