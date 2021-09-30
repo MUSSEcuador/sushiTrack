@@ -311,15 +311,17 @@ function Reportes(props) {
         }
         cont++;
       });
-      if (
-        dataFromDetailRoute?.receipmentLatitude &&
-        dataFromDetailRoute?.receipmentLongitude
-      ) {
-        let newPoint = {
-          lat: dataFromDetailRoute.receipmentLatitude,
-          lng: dataFromDetailRoute.receipmentLongitude,
-        };
-        points.push(newPoint);
+      if (points.length === 1) {
+        if (
+          dataFromDetailRoute?.receipmentLatitude &&
+          dataFromDetailRoute?.receipmentLongitude
+        ) {
+          let newPoint = {
+            lat: dataFromDetailRoute.receipmentLatitude,
+            lng: dataFromDetailRoute.receipmentLongitude,
+          };
+          points.push(newPoint);
+        }
       }
       setDataToShowRoute(points);
       setMarkers(marks);
